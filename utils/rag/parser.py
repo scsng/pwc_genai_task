@@ -1,4 +1,4 @@
-from xml.dom.minidom import Document
+import logging
 from tempfile import NamedTemporaryFile
 import os
 import sys
@@ -11,7 +11,7 @@ from docling.datamodel.pipeline_options import (
 )
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling.datamodel.accelerator_options import AcceleratorOptions, AcceleratorDevice
-
+from langchain_core.documents import Document
 
 
 
@@ -61,12 +61,13 @@ class DoclingParser:
             tmp_file_path = tmp_file.name
         
         try:
-            print(f"Parsing {file_name}...")
+            logging.info(f"Parsing {file_name}...")
             result = self.converter.convert(tmp_file_path)
-            print(f"Parsed {file_name}, extracting pages...")
-            for page in result.document.pages:
-                pages.append(Document(page_content=page.export_to_markdown(), metadata=page.metadata, file_name=file_name))
-            print(f"Extracted {len(pages)} pages from {file_name}")
+            logging.info(f"Parsed {file_name}, extracting pages...")
+            document = result.document
+            for page_idx in range(len(document.pages)):
+                pages.append(Document(page_content=document.export_to_markdown(page_no=page_idx), metadata={"page_number": page_idx+1, "file_name": file_name}))
+            logging.info(f"Extracted {len(pages)} pages from {file_name}")
         finally:
             # Clean up temporary file
             if os.path.exists(tmp_file_path):
@@ -75,8 +76,3 @@ class DoclingParser:
         return pages
 
 
-
-
-
-
-# Initialize the DocumentConverter and convert the document at the given path
