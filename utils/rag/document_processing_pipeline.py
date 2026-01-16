@@ -3,15 +3,13 @@ from typing import List
 
 from .parser import DoclingParser
 from .chunker import MarkdownChunker
-from .embedder import Embedder
 from .vector_db import QdrantDB
 
 
 class DocumentProcessingPipeline:
-    def __init__(self, parser: DoclingParser, chunker: MarkdownChunker, embedder: Embedder, qdrant_db: QdrantDB) -> None:
+    def __init__(self, parser: DoclingParser, chunker: MarkdownChunker, qdrant_db: QdrantDB) -> None:
         self.parser = parser
         self.chunker = chunker
-        self.embedder = embedder
         self.qdrant_db = qdrant_db
 
     def process(self, file_data: bytes, file_name: str) -> None:

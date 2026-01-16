@@ -5,7 +5,6 @@ from utils.logger import setup_logging
 from utils.rag.document_processing_pipeline import DocumentProcessingPipeline
 from utils.rag.parser import DoclingParser
 from utils.rag.chunker import MarkdownChunker
-from utils.rag.embedder import Embedder
 from utils.rag.vector_db import QdrantDB
 from utils.rag.dropbox_downloader import DropboxDownloader
 from utils.chat_client import ChatClient
@@ -36,14 +35,11 @@ def main():
             max_chunk_size=int(os.getenv("MAX_CHUNK_SIZE", "1000")), 
             chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "200"))
         ),
-        embedder=Embedder(
-            model_name=os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-        ),
         qdrant_db=QdrantDB(
             embedding_model=os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"),
             collection_name=os.getenv("COLLECTION_NAME", ""), 
             qdrant_host=os.getenv("QDRANT_HOST", ""), 
-            qdrant_api_key=os.getenv("QDRANT_API_KEY") 
+            qdrant_api_key=os.getenv("QDRANT_API_KEY") ,
         )
     )
 
