@@ -4,7 +4,9 @@ from typing import List
 from .parser import DoclingParser
 from .chunker import MarkdownChunker
 from .embedder import Embedder
-from .vactor_db import QdrantDB
+from .vector_db import QdrantDB
+
+
 class DocumentProcessingPipeline:
     def __init__(self, parser: DoclingParser, chunker: MarkdownChunker, embedder: Embedder, qdrant_db: QdrantDB) -> None:
         self.parser = parser
@@ -25,6 +27,7 @@ class DocumentProcessingPipeline:
         for page in pages:
             chunks.extend(self.chunker.chunk(page))
         print(f"Chunked {file_name} into {len(chunks)} chunks")
-        
-        #embeddings = self.embedder.embed(chunks)
+        self.qdrant_db.upload(chunks)
+        print(f"Uploaded {file_name} to QdrantDB")
+
         

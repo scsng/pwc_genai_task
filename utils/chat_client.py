@@ -10,9 +10,9 @@ class ChatClient:
     
     def __init__(
         self,
-        base_url: str ,
+        base_url: str,
+        model: str,
         api_key: Optional[str] = None,
-        model: str = "google/gemma-3n-e4b-it",
         temperature: float = 0.7,
         max_tokens: int = 512,
     ):
@@ -25,6 +25,7 @@ class ChatClient:
         if not self.base_url:
             raise ValueError("base_url or INFERENCE_API_URL must be set")
         
+        # Initialize chat LLM
         self.llm = ChatOpenAI(
             base_url=self.base_url,
             api_key=self.api_key or "not-needed",
