@@ -8,17 +8,22 @@ from utils.rag.chunker import MarkdownChunker
 from utils.rag.vector_db import QdrantDB
 from utils.rag.dropbox_downloader import DropboxDownloader
 from utils.chat_client import ChatClient
-# Set up logging
+
 setup_logging()
 
-# Dropbox shared folder link from .env
 DROPBOX_SHARED_LINK = os.getenv("DROPBOX_SHARED_LINK", "")
 
-# Initialize Dropbox downloader
 _downloader = None
 
 def get_downloader():
-    """Get or create Dropbox downloader instance."""
+    """Get or create singleton Dropbox downloader instance.
+    
+    Returns:
+        DropboxDownloader instance configured with shared link from environment.
+        
+    Raises:
+        ValueError: If DROPBOX_SHARED_LINK is not set in environment variables.
+    """
     global _downloader
     if _downloader is None:
         if not DROPBOX_SHARED_LINK:
@@ -27,8 +32,13 @@ def get_downloader():
     return _downloader
 
 def main():
+    """Main entry point for document processing pipeline.
+    
+    Initializes the document processing pipeline, connects to Dropbox,
+    downloads all files from the shared folder, and processes them into
+    the vector database.
+    """
     logging.info("Initializing pipeline...")
-    # Initialize pipeline
     document_processing_pipeline = DocumentProcessingPipeline(
         parser=DoclingParser(),
         chunker=MarkdownChunker(
@@ -43,11 +53,9 @@ def main():
         )
     )
 
-    # Get Dropbox downloader
     logging.info(f"Connecting to Dropbox folder: {DROPBOX_SHARED_LINK}")
     downloader = get_downloader()
     
-    # List all files from the folder
     logging.info("Listing files from folder...")
     files = downloader.list_files()
     logging.info(f"Found {len(files)} files")
@@ -56,7 +64,6 @@ def main():
         logging.error("No files found in the folder. Exiting.")
         return
     
-    # Process each file
     for file_name, file_path in files:
         logging.info(f"Processing {file_name}...")
         try:
