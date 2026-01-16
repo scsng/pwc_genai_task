@@ -95,7 +95,8 @@ echo "      compatible with vLLM. Using the base Hugging Face format model inste
 echo ""
 
 
-vllm serve RedHatAI/gemma-3-4b-it-FP8-dynamic\
+# Note: vLLM does not support GGUF format models. Use the base HF model instead.
+vllm serve nvidia/Llama-3.1-8B-Instruct-FP8\
     --host 0.0.0.0 \
     --port 8088 \
     --gpu-memory-utilization 0.85 \
@@ -103,6 +104,9 @@ vllm serve RedHatAI/gemma-3-4b-it-FP8-dynamic\
     --max-num-seqs 5 \
     --no-enable-prefix-caching \
     --limit-mm-per-prompt '{"image": 0}' \
-    --kv-cache-dtype auto 
+    --kv-cache-dtype auto \
+    --enable-auto-tool-choice \
+    --tool-call-parser llama3_json \
+    --chat-template ./tool_chat_template_llama3.1_json.jinja
 
  
