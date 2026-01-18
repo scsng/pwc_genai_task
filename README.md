@@ -26,27 +26,57 @@ For development and testing, I used an ***NVIDIA RTX 5060TI***.
 
 ### Agentic Workflow Pipeline
 
-<img src="./graph.png" alt="Agentic workflow graph" style="zoom: 67%;" />
+<img src="./images/graph.png" alt="Agentic workflow graph" style="zoom: 67%;" />
 
+
+
+```
+START
+  ↓
+[1] relevancy_checker
+  ├── NOT_RELEVANT → generic_response → END
+  └── RELEVANT ↓
+[2] task_planner
+  ↓
+[3] task_executor ←─────────────────────────┐
+  ├── needs_split → task_planner            │
+  ├── search_legal_documents called ↓       │
+  │   [4a] rag_rephraser                    │
+  │     ↓                                   │
+  │   [4b] rag_retrieval_relevance          │
+  │     ├── NOT_RELEVANT → rag_rephraser (retry up to 3x)
+  │     └── RELEVANT ↓                      │
+  ├── calculate_date_difference called ↓    │
+  │   (executed directly)                   │
+  └─→ [5] subtask_summarizer                │
+        ↓                                   │
+      [6] check_more_tasks ─────────────────┘
+        ├── more tasks? → task_executor
+        └── all done ↓
+[7] answer_summarizer
+  ↓
+[8] completeness_check
+  ├── COMPLETE → END
+  └── INCOMPLETE → [9] replan → task_planner (max 1 replan)
+```
 The pipeline uses **LangGraph** for stateful, multi-step hybrid agentic workflows with conditional branching and error recovery.
 
 #### Node Descriptions
 
 1. **Relevancy Checker** — Gates questions; routes legal/date questions forward, others get generic response
 2. **Task Planner** — Decomposes complex questions into subtasks (max 3); can replan if answer incomplete
-3. **Task Executor** — Routes each subtask to appropriate tool:
-   - `CALCULATE_DATE` → date calculation tool
-   - `NEED_RAG` → RAG subgraph
+3. **Task Executor** — Uses LLM tool calling to decide which tool to invoke:
+   - `calculate_date_difference` → date calculation tool (executed directly)
+   - `search_legal_documents` → triggers RAG subgraph
 4. **RAG Subgraph**:
    - *Rephraser* — Optimizes search query with legal terms/synonyms
    - *Retrieval & Relevance Check* — Fetches chunks from QDrant, validates relevance (retries up to 3x)
-   - *RAG to Executor* — Formats results as subtask answer
-5. **Check More Tasks** — Loops back if subtasks remain
-6. **Answer Summarizer** — Synthesizes answers with proper citations `[n] Document, Page X, Section Y`
-7. **Completeness Check** — Validates answer; triggers replan if incomplete (max 1 replan)
+5. **Subtask Summarizer** — Summarizes each subtask answer before moving to next task
+6. **Check More Tasks** — Loops back if subtasks remain
+7. **Answer Summarizer** — Synthesizes all subtask answers with proper citations `[n] Document, Page X, Section Y`
+8. **Completeness Check** — Validates answer; triggers replan if incomplete (max 1 replan)
 
-
-Note: the tool calling bas LLama [prompt](/deployment/tool_chat_template_llama3.1_json.jinja) is from VLLMs offical Llama decstiption with some minor changes.
+Note: The tool calling Llama [prompt](/deployment/tool_chat_template_llama3.1_json.jinja) is from VLLM's official Llama description with some minor changes.
 
 #### Key Design Decisions
 
@@ -104,7 +134,7 @@ Note: the tool calling bas LLama [prompt](/deployment/tool_chat_template_llama3.
 8. Open the link of the streamlit app.
 
 
-Tool caht template is from officakl vllm with a little twist, I choose this becouse big, but fit into memory, and has tool usage
+Tool call template is from official VLLM template with a little twist, I choose this becouse big, but fit into memory, and has tool usage
 
 
 
@@ -114,33 +144,60 @@ Tool caht template is from officakl vllm with a little twist, I choose this beco
 
 ## Testing
 
-I run a quality and performance test. The test notebook is available here: [tests.ipynb](testing/tests.ipynb).
+I run a quality and performance test. 
 
-For the testing I used Gemini 2.5 Thinking.
+For the testing I used Gemini 2.5 Fast and Thinking.
 
 ### Quality test
 
 [Input file](testing/input/quality.csv), [Output file](testing/output/out_quality.csv)
-
+The test notebook is available here: [quality_tests.ipynb](testing/quality_tests.ipynb).
 1. I made the question with the Gemini model based on all the documents (which knowed all the docs). All in all it contains 7 simple and 7 complex questions.
 2. I measured Correctness (1-5), Fluency (1-5), Relevance (1-5), Coverage(1-5)
-3. Because of the limited amount of time, and ~objective results I used LLM as a judge for the test evaluation. To be able to use the eval I used Gemini GEM envirnment. I could have used a notebook, but inclding the documents would have been quite difficult.
+3. Because of the limited amount of time, and ~objective results I used LLM as a judge for the test evaluation. In the Notebook
 
 
 ### Performance test
 
 [Input file](testing/input/performance.csv), [Output file](testing/output/out_performance.csv)
-
+The test notebook is available here: [perfornamce_tests.ipynb](testing/perfornamce_tests.ipynb).
 1. For the question generation I used the same method as in the quality test.
+2. I run 50 sample simple and complex questions 2 times.
+   2.1: 5 item batches (running the queries in a 5 batch query). I choose 5 questions, becouse for this scale it does not seem possible there will be more than 5 concurrent workflow run.
+   2.2: Single inference (a single question at a time)
+
+#### Performance results:
+| Mode           | Question Type   | Number of Questions | Average Response Time (s) |
+|----------------|----------------|---------------------|--------------------------|
+| Concurrent     | Complex        | 18                  | 36.059                   |
+| Concurrent     | Simple         | 32                  | 20.493                   |
+| Sequential     | Complex        | 18                  | 35.048                   |
+| Sequential     | Simple         | 32                  | 18.081                   |
+
+* The GPU could easily handle up to 5 questions concurrently, with no noticeable increase in response time—this is likely the current practical maximum.
+* Complex questions took 84.34% longer to answer on average, likely due to requiring more subtasks.
+
+#### Bottleneck analysis:
+ * For both qwuestion types I used the longest question generation time.
+ * Not surpisingly the longest single node time was the summarization mostly between 10-15 sec.
+
+
+Simple question ( sec):
+For the * task took the longest time to finish.
+<img src="./images/langfuse_performance_bottleneck_simple.png" alt="Agentic workflow graph" style="zoom: 100%;" />
+
+
+
+For the * task took the longest time to finish.
+
+Complex question (sec ):
+<img src="./images/langfuse_performance_bottleneck_simple.png" alt="Agentic workflow graph" style="zoom: 100%;" />
 
 
 
 
-## Review
 
-### Bottleck analyis
-
-#### Optimization tips
+### Optimization tips
 
 - Join smaller junks to eachother, in the current solution these are too short without enough context.
 - Choose a stronger model with a better GPU
@@ -160,7 +217,7 @@ The following legal documents are currently used in the system:
 - Act I of 2012 on the Labor Code.pdf
 - Fundamental law.pdf
 
-This are not containing all information about Hungiaran low, these are just for representation for now. The Dropbox link will be removed latest 2026. 02. 18.
+These do not contain all information about Hungarian law, they are just for representation for now. The Dropbox link will be removed by 2026-02-18.
 
 
 

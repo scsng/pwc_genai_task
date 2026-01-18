@@ -208,5 +208,5 @@ __marimo__/
 .keys/
 /docs
 
-*.ipynb
+
 /docker

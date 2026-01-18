@@ -46,9 +46,6 @@ class RAGRetrieval:
                 search_legal_documents("statute of limitations for contract disputes")
             """
             result = vector_db.search(query)
-            print("--------------------------------")
-            print(f"RAG retrieval result: {result}")
-            print("--------------------------------")
             return self._format_documents(result)
         
         return search_legal_documents
