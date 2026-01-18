@@ -1,7 +1,7 @@
 
 from typing import List
 from langchain_core.documents import Document
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_qdrant import FastEmbedSparse, Qdrant, QdrantVectorStore, RetrievalMode
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import UnexpectedResponse
@@ -101,5 +101,5 @@ class QdrantDB:
         Returns:
             List of top-k most similar Document objects.
         """
-        return self.qdrant_client.similarity_search(query, top_k=self.top_k)
+        return self.qdrant_client.similarity_search(query, k=self.top_k)
     
