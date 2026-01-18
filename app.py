@@ -3,6 +3,7 @@ from utils.chat_client import ChatClient
 from utils.agents.agentic_workflow import AgenticWorkflow
 from utils.logger import setup_logging
 from langchain_core.messages import HumanMessage, AIMessage
+
 import os
 import logging
 
@@ -25,7 +26,7 @@ def get_chat_client():
 def get_agentic_workflow():
     """Initialize the agentic workflow with LLM."""
     chat_client = get_chat_client()
-    return AgenticWorkflow(llm=chat_client.llm)
+    return AgenticWorkflow(llm=chat_client.llm,)
 
 agentic_workflow = get_agentic_workflow()
 

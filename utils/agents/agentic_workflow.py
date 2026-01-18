@@ -7,7 +7,8 @@ from langgraph.graph.message import add_messages
 
 from utils.agents.prompts import SYSTEM_PROMPT
 from utils.agents.tools.date_caculator import calculate_date_difference
-
+from rag.vector_db import QdrantDB
+from utils.chat_client import ChatClient
 
 class AgentState(TypedDict):
     """State for the agentic workflow."""
@@ -19,7 +20,8 @@ class AgenticWorkflow:
     
     def __init__(
         self,
-        llm,
+        llm : ChatClient,
+        vector_db : QdrantDB
     ):
         """Initialize the agentic workflow.
         

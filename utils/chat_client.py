@@ -13,7 +13,7 @@ class ChatClient:
         base_url: str,
         model: str,
         api_key: Optional[str] = None,
-        temperature: float = 0.7,
+        temperature: float = 0.1,
         max_tokens: int = 512,
     ):
         load_dotenv(override=True)
@@ -35,7 +35,7 @@ class ChatClient:
         )
     
     def invoke(self, messages):
-        """Invoke the model with messages (LangGraph-compatible)."""
+        """Invoke the model with messages"""
         return self.llm.invoke(messages)
     
     def stream(self, messages):
