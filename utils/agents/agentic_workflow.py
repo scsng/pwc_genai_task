@@ -7,7 +7,7 @@ from langgraph.graph.message import add_messages
 
 from utils.agents.prompts import SYSTEM_PROMPT
 from utils.agents.tools.date_caculator import calculate_date_difference
-from rag.vector_db import QdrantDB
+import osfrom rag.vector_db import QdrantDB
 from utils.chat_client import ChatClient
 
 class AgentState(TypedDict):
@@ -113,7 +113,12 @@ class AgenticWorkflow:
         # Single node goes directly to END
         workflow.add_edge("agent", END)
         
-        return workflow.compile()
+        result = workflow.compile()
+        png_graph = result.get_graph().draw_mermaid_png()
+        with open("graph.png", "wb") as f:
+            f.write(png_graph)
+
+        return result
     
     def invoke(self, user_message: str, chat_history: list = None) -> str:
         """Invoke the agentic workflow with a user message.
