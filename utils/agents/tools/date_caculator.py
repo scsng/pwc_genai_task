@@ -67,7 +67,6 @@ def calculate_date_difference(
             hours = total_seconds / 3600
             minutes = (total_seconds % 3600) / 60
             result += f"\n- {hours:.1f} hour(s) ({minutes:.1f} minute(s))"
-        print("TOOL RESULT: ", result)
         return result
         
     except ValueError as e:

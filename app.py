@@ -3,9 +3,16 @@ from utils.chat_client import ChatClient
 from utils.agents.agentic_workflow import AgenticWorkflow
 from utils.logger import setup_logging
 from langchain_core.messages import HumanMessage, AIMessage
+from langfuse import get_client
 
 import os
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(override=True)
+
+from utils.rag.vector_db import QdrantDB
 
 # Set up logging
 setup_logging()
@@ -26,16 +33,42 @@ def get_chat_client():
 def get_agentic_workflow():
     """Initialize the agentic workflow with LLM."""
     chat_client = get_chat_client()
-    return AgenticWorkflow(llm=chat_client.llm,)
+    max_task_count = int(os.getenv("MAX_TASK_COUNT", "3"))
+    return AgenticWorkflow(llm=chat_client.llm,
+                           vector_db=QdrantDB(collection_name=os.getenv("COLLECTION_NAME"),
+                                              qdrant_host=os.getenv("QDRANT_HOST"),
+                                              embedding_model=os.getenv("EMBEDDING_MODEL"),
+                                              qdrant_api_key=os.getenv("QDRANT_API_KEY"),
+                                              top_k=os.getenv("TOP_K")),
+                           max_task_count=max_task_count)
+
+ 
+langfuse = get_client()
+ 
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+
 
 agentic_workflow = get_agentic_workflow()
+
+
+
 
 # Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Title
-st.title("⚖️ Legal help")
+# Title and clear chat button in header
+col1, col2 = st.columns([6, 1])
+with col1:
+    st.title("⚖️ Legal help")
+with col2:
+    if st.button("🗑️ Clear", help="Clear chat history"):
+        st.session_state.messages = []
+        st.rerun()
 
 # Display chat history
 for message in st.session_state.messages:
@@ -52,24 +85,43 @@ if prompt := st.chat_input("Ask a legal question..."):
     # Get assistant response using agentic workflow
     with st.chat_message("assistant"):
         try:
+            # Status placeholder for showing current node
+            status_placeholder = st.empty()
             message_placeholder = st.empty()
             full_response = ""
             
             # Convert chat history to LangChain messages
+            # Limit to configured number of previous messages (env var CHAT_HISTORY_LIMIT, default 6)
+            history_limit = int(os.getenv("CHAT_HISTORY_LIMIT", "6"))
             chat_history = []
-            for msg in st.session_state.messages[:-1]:  # Exclude the current prompt
+            # Get the last N messages, excluding the current prompt
+            recent_messages = st.session_state.messages[:-1][-history_limit:] if history_limit > 0 else []
+            for msg in recent_messages:
                 if msg["role"] == "user":
                     chat_history.append(HumanMessage(content=msg["content"]))
                 elif msg["role"] == "assistant":
                     chat_history.append(AIMessage(content=msg["content"]))
             
             # Stream the response from agentic workflow
-            for chunk in agentic_workflow.stream(prompt, chat_history=chat_history):
-                if hasattr(chunk, 'content') and chunk.content:
-                    full_response += chunk.content
+            for event in agentic_workflow.stream(prompt, chat_history=chat_history):
+                if isinstance(event, dict):
+                    if event.get("type") == "node":
+                        # Tell tha node which is executed in the moment
+                        status_placeholder.info(f"**{event['display_name']}**")
+                    elif event.get("type") == "answer":
+                        # Remove status, only show the final answer
+                        status_placeholder.empty()
+                        full_response = event["content"]
+                        message_placeholder.markdown(full_response)
+                elif hasattr(event, 'content') and event.content:
+                    # Legacy support for AIMessage (can be needed sometimes)
+                    full_response += event.content
                     message_placeholder.markdown(full_response + "▌")
             
-            message_placeholder.markdown(full_response)
+            if not full_response:
+                message_placeholder.markdown("I couldn't generate a response.")
+                full_response = "I couldn't generate a response."
+            
             st.session_state.messages.append({"role": "assistant", "content": full_response})
         except Exception as e:
             error_msg = f"Error: {str(e)}"

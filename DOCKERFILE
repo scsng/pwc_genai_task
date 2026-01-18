@@ -1,0 +1,57 @@
+# First, build the application in the `/app` directory
+FROM python:3.12 AS builder
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+
+# The installer requires curl (and certificates) to download the release archive
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
+
+WORKDIR /app
+
+# Copy only dependency files first for better caching
+COPY ./pyproject.toml ./uv.lock ./
+
+# Create virtual environment (this layer will be cached and reused)
+RUN uv venv
+
+# Install dependencies (this layer will be cached when dependencies don't change)
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install -r pyproject.toml --extra-index-url https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match && \
+    (uv pip uninstall docling || true) && \
+    uv pip install docling --extra-index-url https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match && \
+    .venv/bin/python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4o')" && \
+    .venv/bin/python -c "from tqdm import tqdm; import multiprocessing; tqdm._lock = multiprocessing.RLock(); from langchain_qdrant import FastEmbedSparse; FastEmbedSparse(model_name='Qdrant/bm25')"
+
+# Then, use a final image without uv
+FROM python:3.12-slim
+
+# Create user for security
+RUN addgroup --system appgroup && \
+    adduser --system --ingroup appgroup --home /home/appuser appuser
+
+WORKDIR /genai
+
+# Copy the virtual environment from the builder
+COPY --from=builder --chown=appuser:appgroup /app/.venv /genai/.venv
+
+# Copy application files directly to final image (not from builder)
+COPY --chown=appuser:appgroup ./alembic.ini ./alembic.ini
+COPY --chown=appuser:appgroup ./alembic ./alembic
+COPY --chown=appuser:appgroup ./app ./app
+COPY --chown=appuser:appgroup ./entrypoint.sh ./entrypoint.sh
+
+# Place virtual environment executables in the path
+ENV PATH="/genai/.venv/bin:$PATH"
+# Increase OTLP exporter timeout for langfuse
+ENV OTEL_EXPORTER_OTLP_TIMEOUT=20
+
+# Switch to appuser for security
+USER appuser
+
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
+
+CMD ["/bin/bash", "-c", "/genai/entrypoint.sh"]
