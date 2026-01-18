@@ -1,4 +1,4 @@
-"""Utility modules for the pwc-genai-task project."""
+"""Utility modules for the genai-task project."""
 
 from .chat_client import ChatClient
 
