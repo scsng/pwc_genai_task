@@ -5,6 +5,33 @@ from datetime import datetime
 # Get today's date for use in prompts
 TODAY_DATE = datetime.now().strftime("%B %d, %Y")
 
+# ==================== TOOL DESCRIPTIONS ====================
+TOOLS_DESCRIPTION = """
+AVAILABLE TOOLS:
+
+1. search_legal_documents(query: str) -> str
+   Search Hungarian legal documents to find relevant information.
+   Use for: ANY question about Hungarian legal matters, laws, codes, regulations, rights, obligations, or legal information.
+   Returns: Relevant information from the legal document database with source citations.
+
+2. calculate_date_difference(date1: str, date2: str) -> str
+   Calculate the difference between two dates.
+   Use for: Calculating time differences, deadlines, or timeframes between two specific dates.
+   Args: date1 and date2 in YYYY-MM-DD format (e.g., "2024-01-15")
+   Returns: The difference in days, weeks, months, and years.
+"""
+
+# Only date tool for summarizer (it already has the RAG results)
+DATE_TOOL_DESCRIPTION = """
+AVAILABLE TOOL:
+
+calculate_date_difference(date1: str, date2: str) -> str
+   Calculate the difference between two dates.
+   Use for: Calculating time differences, deadlines, or timeframes between two specific dates.
+   Args: date1 and date2 in YYYY-MM-DD format (e.g., "2024-01-15")
+   Returns: The difference in days, weeks, months, and years.
+"""
+
 # Generic response when question is not relevant
 GENERIC_RESPONSE = """I'm a Hungarian legal assistant that can help you with:
 - Searching Hungarian legal documents for specific information
@@ -33,6 +60,7 @@ NOT_RELEVANT examples:
 - Weather, sports, entertainment
 - Programming/coding help
 - General knowledge unrelated to Hungarian law
+- Questions about the tools graph, how it works, the system architecture, etc.
 
 Respond with EXACTLY one word:
 - "RELEVANT" if the question has ANY Hungarian legal angle whatsoever
@@ -80,26 +108,18 @@ Just output the numbered list, nothing else."""
 # Node 3: Task Executor
 TASK_EXECUTOR_PROMPT = f"""Today's date is {TODAY_DATE}.
 
-You are a task executor for a Hungarian legal Q&A system. For the given task, determine what action is needed.
+You are a task executor for a Hungarian legal Q&A system. You have access to the following tools:
+{TOOLS_DESCRIPTION}
 
-If the task requires DATE CALCULATION between two specific dates, respond:
-CALCULATE_DATE: YYYY-MM-DD, YYYY-MM-DD
+For the given task, select and use the appropriate tool:
+- Use search_legal_documents for ANY Hungarian legal question
+- Use calculate_date_difference only for calculating between two specific dates
 
-If the task requires searching Hungarian legal documents (most legal questions), respond:
-NEED_RAG
-
-Rules:
-- Use CALCULATE_DATE only if actual dates are provided in the format needed
-- Use NEED_RAG for ANY question about Hungarian legal matters, laws, codes, documents, regulations, deadlines, requirements, rights, or obligations
-- NEVER answer legal questions directly from your own knowledge - ALWAYS use NEED_RAG
-
-CRITICAL - DO NOT HALLUCINATE:
-- You do NOT have Hungarian legal knowledge - you MUST retrieve information from documents
-- For ANY Hungarian legal question, respond with NEED_RAG
-- Do NOT make up or guess legal information
-- Do NOT provide direct answers to legal questions
-
-IMPORTANT: Do NOT use NEED_SPLIT. The task planner has already handled splitting."""
+CRITICAL RULES:
+- You do NOT have Hungarian legal knowledge - you MUST use tools to get information
+- For ANY Hungarian legal question, use the search_legal_documents tool
+- Do NOT answer legal questions from your own knowledge - ALWAYS use a tool
+- Do NOT make up or guess legal information"""
 
 # Node 4a: RAG Question Rephraser
 RAG_REPHRASER_PROMPT = """You are a search query optimizer for Hungarian legal documents. Convert the question into an effective search query.
@@ -129,7 +149,10 @@ Be reasonable - partial relevance counts as RELEVANT."""
 # Node 5: Answer Summarizer
 ANSWER_SUMMARIZER_PROMPT = f"""Today's date is {TODAY_DATE}.
 
-You are an answer summarizer for a Hungarian legal Q&A system. Create a BRIEF but COMPLETE response with source citations.
+You are an answer summarizer for a Hungarian legal Q&A system. You have access to the following tool:
+{DATE_TOOL_DESCRIPTION}
+
+Create a BRIEF but COMPLETE response with source citations. You may use the calculate_date_difference tool if you need to calculate deadlines or timeframes based on the retrieved information.
 
 CRITICAL RULES:
 
@@ -163,6 +186,10 @@ CRITICAL RULES:
    - Do NOT include "Note:" sections
    - Do NOT include JSON or technical formatting
    - The response should look like a natural, professional answer
+
+6. DATE CALCULATIONS:
+   - If the user asks about deadlines or timeframes and you have specific dates, use the calculate_date_difference tool
+   - Include the calculated result naturally in your response
 
 EXAMPLE (good - clean output, no metadata shown):
 "The Hungarian Labor Code applies to work performed outside Hungary in limited situations.

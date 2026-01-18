@@ -99,10 +99,10 @@ NODE_DISPLAY_NAMES = {
     "generic_response": "💬 Generating Response",
     "task_planner": "📋 Planning Tasks",
     "task_executor": "⚙️ Executing Task",
+    "subtask_summarizer": "📝 Summarizing Subtask",
     "check_more_tasks": "✅ Checking Progress",
     "rag_rephraser": "✏️ Rephrasing Query",
     "rag_retrieval_and_relevance_checker": "📚 Searching Documents",
-    "rag_to_executor": "📄 Processing Results",
     "answer_summarizer": "📝 Summarizing Answer",
     "completeness_check": "🔎 Verifying Completeness",
     "replan": "🔄 Replanning",
@@ -240,7 +240,7 @@ class AgenticWorkflow:
     
     # ==================== NODE 3: TASK EXECUTOR ====================
     def _task_executor(self, state: AgentState) -> AgentState:
-        """Execute current subtask."""
+        """Execute current subtask using tool calling."""
         subtasks = list(state["subtasks"])
         idx = state["current_task_idx"]
         
@@ -248,46 +248,59 @@ class AgenticWorkflow:
             return state
         
         question = subtasks[idx]["question"]
-        response = self._ask_llm(TASK_EXECUTOR_PROMPT, f"Task: {question}")
         
-        # Check for split request
-        if "NEED_SPLIT" in response:
-            return {**state, "needs_split": True, "task_to_split": question}
+        # Use tools already initialized in __init__
+        tools = [self.date_tool, self.search_tool]
         
-        # Try date calculation
-        answer = self._try_date_calculation(response, question)
+        # Let LLM decide which tool to use
+        llm_with_tools = self.llm.bind_tools(tools)
+        response = llm_with_tools.invoke([
+            SystemMessage(content=TASK_EXECUTOR_PROMPT),
+            HumanMessage(content=f"Task: {question}")
+        ])
         
-        # Check if RAG is needed
-        if answer is None and "NEED_RAG" in response:
+        # Get tool calls from response
+        tool_calls = response.tool_calls if response.tool_calls else []
+        
+        # Process all tool calls - collect date results and check for RAG trigger
+        date_results = []
+        trigger_rag = False
+        
+        for tool_call in tool_calls:
+            tool_name = tool_call.get("name")
+            tool_args = tool_call.get("args", {})
+            
+            if tool_name == "calculate_date_difference":
+                # Execute date calculation and collect result
+                result = self.date_tool.invoke(tool_args)
+                date_results.append(result)
+            
+            elif tool_name == "search_legal_documents":
+                trigger_rag = True
+        
+        # Build enriched question with date calculation results if any
+        enriched_question = question
+        if date_results:
+            enriched_question = f"{question}\n\nDate calculation results:\n" + "\n".join(date_results)
+        
+        # Route based on tool calls
+        if trigger_rag:
+            # Trigger RAG subgraph with enriched question
             return {
                 **state,
-                "rag_state": create_rag_state(question),
+                "rag_state": create_rag_state(enriched_question),
                 "needs_split": False
             }
         
-        # Use direct answer if no tool was triggered
-        if answer is None:
-            answer = f"Q: {question}\nA: {response}"
+        if date_results:
+            # Only date calculation needed - mark as completed
+            subtasks[idx] = SubTask(question=question, answer="\n".join(date_results), status="completed")
+            return {**state, "subtasks": subtasks, "needs_split": False}
         
+        # No tool called - use LLM response directly (shouldn't happen for legal questions)
+        answer = response.content if response.content else "No answer generated."
         subtasks[idx] = SubTask(question=question, answer=answer, status="completed")
         return {**state, "subtasks": subtasks, "needs_split": False}
-    
-    def _try_date_calculation(self, response: str, question: str) -> Optional[str]:
-        """Attempt to extract and calculate dates from response."""
-        if "CALCULATE_DATE:" not in response:
-            return None
-        try:
-            date_part = response.split("CALCULATE_DATE:")[1].strip()
-            dates = date_part.split(",")
-            if len(dates) >= 2:
-                result = self.date_tool.invoke({
-                    "date1": dates[0].strip(),
-                    "date2": dates[1].strip()
-                })
-                return f"Q: {question}\nA: {result}"
-        except Exception:
-            pass
-        return None
     
     def _route_after_executor(self, state: AgentState) -> str:
         """Route after task execution."""
@@ -296,7 +309,51 @@ class AgenticWorkflow:
         rag_state = state.get("rag_state")
         if rag_state and not rag_state.get("is_relevant", False):
             return "rag_rephraser"
-        return "check_more_tasks"
+        return "subtask_summarizer"
+    
+    def _subtask_summarizer(self, state: AgentState) -> AgentState:
+        """Summarize the current subtask answer using the same format as the final answer summarizer."""
+        subtasks = list(state["subtasks"])
+        idx = state["current_task_idx"]
+        chat_history = state.get("chat_history", [])
+        
+        if idx >= len(subtasks) or not subtasks[idx].get("answer"):
+            return state
+        
+        current_task = subtasks[idx]
+        
+        # Build user content with chat history for context-aware summarization
+        user_content = f"Original Question: {current_task['question']}\n\nSubtask Answers:\n{current_task['answer']}"
+        if chat_history:
+            history_context = self._format_chat_history(chat_history)
+            user_content = f"Previous conversation (for context - helps understand follow-up questions):\n{history_context}\n\n{user_content}"
+        
+        # Use tool calling to allow date calculations during summarization
+        llm_with_tools = self.llm.bind_tools([self.date_tool])
+        response = llm_with_tools.invoke([
+            SystemMessage(content=ANSWER_SUMMARIZER_PROMPT),
+            HumanMessage(content=user_content)
+        ])
+        
+        # Process any tool calls (date calculations)
+        summarized_answer = response.content or ""
+        if response.tool_calls:
+            tool_results = []
+            for tool_call in response.tool_calls:
+                if tool_call["name"] == "calculate_date_difference":
+                    result = self.date_tool.invoke(tool_call["args"])
+                    tool_results.append(result)
+            
+            # If there were tool calls, ask LLM to incorporate results
+            if tool_results:
+                followup_content = f"Original response: {summarized_answer}\n\nDate calculation results:\n{chr(10).join(tool_results)}\n\nPlease incorporate these date calculations into your final response."
+                final_response = self._ask_llm(ANSWER_SUMMARIZER_PROMPT, followup_content)
+                summarized_answer = final_response
+        
+        # Update the subtask with the summarized answer
+        subtasks[idx] = SubTask(question=current_task["question"], answer=summarized_answer, status="completed")
+        
+        return {**state, "subtasks": subtasks}
     
     def _check_more_tasks(self, state: AgentState) -> AgentState:
         """Move to next task."""
@@ -329,19 +386,30 @@ class AgenticWorkflow:
         }
     
     def _rag_retrieval_and_relevance_checker(self, state: AgentState) -> AgentState:
-        """Retrieve documents and check relevance."""
+        """Retrieve documents, check relevance, and store answer if done."""
         rag_state = state["rag_state"]
         query = rag_state["original_query"]
         search_query = rag_state["rephrased_queries"][-1] if rag_state["rephrased_queries"] else query
         
         # Retrieve chunks via tool calling
         chunks = self._retrieve_chunks(search_query)
+        new_retry_count = rag_state["retry_count"] + 1
         
         if not chunks:
+            # No chunks found - check if we should retry or give up
+            if new_retry_count >= self.MAX_RAG_RETRIES:
+                # Max retries reached, store "no info found" as answer
+                subtasks = list(state["subtasks"])
+                idx = state["current_task_idx"]
+                subtasks[idx] = SubTask(question=query, answer="No relevant information found in the legal documents.", status="completed")
+                return {
+                    **state,
+                    "subtasks": subtasks,
+                    "rag_state": {**rag_state, "retrieved_chunks": [], "is_relevant": True, "retry_count": new_retry_count}
+                }
             return {
                 **state,
-                "rag_state": {**rag_state, "retrieved_chunks": [], "is_relevant": False, 
-                              "retry_count": rag_state["retry_count"] + 1}
+                "rag_state": {**rag_state, "retrieved_chunks": [], "is_relevant": False, "retry_count": new_retry_count}
             }
         
         # Check relevance
@@ -353,14 +421,27 @@ class AgenticWorkflow:
         
         is_relevant = check_relevance_keyword(response)
         
+        # If relevant or max retries reached, store the answer
+        if is_relevant or new_retry_count >= self.MAX_RAG_RETRIES:
+            subtasks = list(state["subtasks"])
+            idx = state["current_task_idx"]
+            answer = "\n".join(chunks[:5]) if chunks else "No relevant information found in the legal documents."
+            subtasks[idx] = SubTask(question=query, answer=answer, status="completed")
+            return {
+                **state,
+                "subtasks": subtasks,
+                "rag_state": {**rag_state, "retrieved_chunks": chunks, "relevant_chunks": chunks[:5], "retry_count": new_retry_count, "is_relevant": True}
+            }
+        
+        # Not relevant yet, will retry
         return {
             **state,
             "rag_state": {
                 **rag_state,
                 "retrieved_chunks": chunks,
-                "relevant_chunks": chunks[:5] if is_relevant else [],
-                "retry_count": rag_state["retry_count"] + 1,
-                "is_relevant": is_relevant
+                "relevant_chunks": [],
+                "retry_count": new_retry_count,
+                "is_relevant": False
             }
         }
     
@@ -385,29 +466,13 @@ class AgenticWorkflow:
     def _route_rag_relevance(self, state: AgentState) -> str:
         """Route based on RAG relevance."""
         rag_state = state["rag_state"]
-        if rag_state["is_relevant"] or rag_state["retry_count"] >= self.MAX_RAG_RETRIES:
-            return "rag_to_executor"
+        if rag_state["is_relevant"]:
+            return "subtask_summarizer"
         return "rag_rephraser"
-    
-    def _rag_to_executor(self, state: AgentState) -> AgentState:
-        """Convert RAG results to task answer."""
-        rag_state = state["rag_state"]
-        subtasks = list(state["subtasks"])
-        idx = state["current_task_idx"]
-        
-        query = rag_state["original_query"]
-        chunks = rag_state["relevant_chunks"] or rag_state["retrieved_chunks"][:3]
-        search_query = rag_state["rephrased_queries"][-1] if rag_state["rephrased_queries"] else query
-        
-        answer = (f"Q: {query}\nSearch Query: {search_query}\nA: " + "\n".join(chunks)) if chunks \
-            else f"Q: {query}\nA: No relevant information found."
-        
-        subtasks[idx] = SubTask(question=query, answer=answer, status="completed")
-        return {**state, "subtasks": subtasks, "rag_state": {**rag_state, "is_relevant": True}}
     
     # ==================== NODE 5: ANSWER SUMMARIZER ====================
     def _answer_summarizer(self, state: AgentState) -> AgentState:
-        """Summarize all subtask answers into final answer."""
+        """Summarize all subtask answers into final answer, with optional date calculation."""
         answers = [t["answer"] for t in state["subtasks"] if t["answer"]]
         chat_history = state.get("chat_history", [])
         
@@ -420,11 +485,29 @@ class AgenticWorkflow:
             history_context = self._format_chat_history(chat_history)
             user_content = f"Previous conversation (for context - helps understand follow-up questions):\n{history_context}\n\n{user_content}"
         
-        response = self._ask_llm(
-            ANSWER_SUMMARIZER_PROMPT,
-            user_content
-        )
-        return {**state, "final_answer": response}
+        # Use tool calling to allow date calculations during summarization
+        llm_with_tools = self.llm.bind_tools([self.date_tool])
+        response = llm_with_tools.invoke([
+            SystemMessage(content=ANSWER_SUMMARIZER_PROMPT),
+            HumanMessage(content=user_content)
+        ])
+        
+        # Process any tool calls (date calculations)
+        final_answer = response.content or ""
+        if response.tool_calls:
+            tool_results = []
+            for tool_call in response.tool_calls:
+                if tool_call["name"] == "calculate_date_difference":
+                    result = self.date_tool.invoke(tool_call["args"])
+                    tool_results.append(result)
+            
+            # If there were tool calls, ask LLM to incorporate results
+            if tool_results:
+                followup_content = f"Original response: {final_answer}\n\nDate calculation results:\n{chr(10).join(tool_results)}\n\nPlease incorporate these date calculations into your final response."
+                final_response = self._ask_llm(ANSWER_SUMMARIZER_PROMPT, followup_content)
+                final_answer = final_response
+        
+        return {**state, "final_answer": final_answer}
     
     # ==================== NODE 6: COMPLETENESS CHECK ====================
     def _answer_completeness_check(self, state: AgentState) -> AgentState:
@@ -463,10 +546,10 @@ class AgenticWorkflow:
             "generic_response": self._generic_response,
             "task_planner": self._task_planner,
             "task_executor": self._task_executor,
+            "subtask_summarizer": self._subtask_summarizer,
             "check_more_tasks": self._check_more_tasks,
             "rag_rephraser": self._rag_rephraser,
             "rag_retrieval_and_relevance_checker": self._rag_retrieval_and_relevance_checker,
-            "rag_to_executor": self._rag_to_executor,
             "answer_summarizer": self._answer_summarizer,
             "completeness_check": self._answer_completeness_check,
             "replan": self._replan,
@@ -484,13 +567,13 @@ class AgenticWorkflow:
         workflow.add_edge("task_planner", "task_executor")
         workflow.add_conditional_edges("task_executor", self._route_after_executor,
                                        {"task_planner": "task_planner", "rag_rephraser": "rag_rephraser", 
-                                        "check_more_tasks": "check_more_tasks"})
+                                        "subtask_summarizer": "subtask_summarizer"})
+        workflow.add_edge("subtask_summarizer", "check_more_tasks")
         workflow.add_conditional_edges("check_more_tasks", self._route_tasks,
                                        {"task_executor": "task_executor", "answer_summarizer": "answer_summarizer"})
         workflow.add_edge("rag_rephraser", "rag_retrieval_and_relevance_checker")
         workflow.add_conditional_edges("rag_retrieval_and_relevance_checker", self._route_rag_relevance,
-                                       {"rag_to_executor": "rag_to_executor", "rag_rephraser": "rag_rephraser"})
-        workflow.add_edge("rag_to_executor", "check_more_tasks")
+                                       {"subtask_summarizer": "subtask_summarizer", "rag_rephraser": "rag_rephraser"})
         workflow.add_edge("answer_summarizer", "completeness_check")
         workflow.add_conditional_edges("completeness_check", self._route_completeness, 
                                        {"replan": "replan", "end": END})
@@ -503,7 +586,7 @@ class AgenticWorkflow:
     def _save_graph_visualization(self, graph):
         """Save graph visualization to file."""
         try:
-            with open("graph.png", "wb") as f:
+            with open("./images/graph.png", "wb") as f:
                 f.write(graph.get_graph().draw_mermaid_png())
         except Exception:
             pass
