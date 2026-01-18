@@ -154,7 +154,7 @@ For the testing I used Gemini 2.5 Fast and Thinking.
 The test notebook is available here: [quality_tests.ipynb](testing/quality_tests.ipynb).
 1. I made the question with the Gemini model based on all the documents (which knowed all the docs). All in all it contains 7 simple and 7 complex questions.
 2. I measured Correctness (1-5), Fluency (1-5), Relevance (1-5), Coverage(1-5)
-3. Because of the limited amount of time, and ~objective results I used LLM as a judge for the test evaluation. In the Notebook
+3. Because of the limited amount of time, and ~objective results I used LLM as a judge for the test evaluation. 
 
 
 ### Performance test
@@ -169,31 +169,34 @@ The test notebook is available here: [perfornamce_tests.ipynb](testing/perfornam
 #### Performance results:
 | Mode           | Question Type   | Number of Questions | Average Response Time (s) |
 |----------------|----------------|---------------------|--------------------------|
-| Concurrent     | Complex        | 18                  | 36.059                   |
-| Concurrent     | Simple         | 32                  | 20.493                   |
-| Sequential     | Complex        | 18                  | 35.048                   |
-| Sequential     | Simple         | 32                  | 18.081                   |
+| Concurrent     | Complex        | 7                   | 58.586                   |
+| Concurrent     | Simple         | 18                  | 37.250                   |
+| Sequential     | Complex        | 7                   | 59.637                   |
+| Sequential     | Simple         | 18                  | 31.608                   |
 
 * The GPU could easily handle up to 5 questions concurrently, with no noticeable increase in response time—this is likely the current practical maximum.
-* Complex questions took 84.34% longer to answer on average, likely due to requiring more subtasks.
+* Complex questions took 57.3% longer to answer on average compared to simple questions, likely due to requiring more subtasks.
 
 #### Bottleneck analysis:
  * For both qwuestion types I used the longest question generation time.
  * Not surpisingly the longest single node time was the summarization mostly between 10-15 sec.
 
 
-Simple question ( sec):
-For the * task took the longest time to finish.
+Simple question (94 sec):
+What are the legal consequences of 'liability for result'?
+For the answer summarizer task took the longest time to finish, but it run a in multiple splitting route.
+I thiunk the question was niot specific enogh, maybe achecker for that would be a good idea.
 <img src="./images/langfuse_performance_bottleneck_simple.png" alt="Agentic workflow graph" style="zoom: 100%;" />
 
 
 
-For the * task took the longest time to finish.
-
-Complex question (sec ):
+For the answer summarizer task took the longest time to finish.
+Explain the statute of limitations for the punishability of criminal offences.
+Unfotunately it didnt find many relevant documents. Probably it would need a better retreival promping and technique.
+Complex question (92 sec):
 <img src="./images/langfuse_performance_bottleneck_simple.png" alt="Agentic workflow graph" style="zoom: 100%;" />
 
-
+Probably also the issue is that it cannot
 
 
 
