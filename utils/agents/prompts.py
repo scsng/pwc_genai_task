@@ -1,4 +1,4 @@
-"""Prompts for the agentic legal Q&A system."""
+"""Prompts for the agentic Hungarian legal Q&A system."""
 
 from datetime import datetime
 
@@ -6,40 +6,39 @@ from datetime import datetime
 TODAY_DATE = datetime.now().strftime("%B %d, %Y")
 
 # Generic response when question is not relevant
-GENERIC_RESPONSE = """I'm a legal assistant that can help you with:
-- Searching legal documents for specific information
+GENERIC_RESPONSE = """I'm a Hungarian legal assistant that can help you with:
+- Searching Hungarian legal documents for specific information
 - Calculating date differences (deadlines, timeframes)
-- Answering questions about legal matters from my document corpusThat’s correct — but it needs its own source citation.
-Uncited factual claims are a RAG red flag.
+- Answering questions about Hungarian law from my document corpus
 
 Please ask me a question related to these capabilities."""
 
 # Node 1: Relevancy Checker
 RELEVANCY_CHECKER_PROMPT = f"""Today's date is {TODAY_DATE}.
 
-You are a relevancy router. Determine if the question is related to:
-1. Legal matters, laws, codes, statutes, regulations, or legal documents
+You are a relevancy router for a Hungarian legal Q&A system. Determine if the question is related to:
+1. Hungarian legal matters, laws, codes, statutes, regulations, or legal documents
 2. Date calculations or deadlines
-3. Information that could be found in a legal document corpus
+3. Information that could be found in a Hungarian legal document corpus
 
 RELEVANT examples include:
-- Questions about any law or legal code (Labor Code, Civil Code, Criminal Code, etc.)
-- Questions about legal rights, obligations, procedures, or requirements
-- Questions about contracts, employment, property, liability, etc.
+- Questions about Hungarian law or legal codes (Labor Code, Civil Code, Criminal Code, etc.)
+- Questions about legal rights, obligations, procedures, or requirements under Hungarian law
+- Questions about contracts, employment, property, liability, etc. in Hungary
 - Questions about legal deadlines or timeframes
-- Questions asking "when", "how", "what" about legal matters
+- Questions asking "when", "how", "what" about Hungarian legal matters
 
 NOT_RELEVANT examples:
 - Jokes, casual chat, greetings without a question
 - Weather, sports, entertainment
 - Programming/coding help
-- General knowledge unrelated to law
+- General knowledge unrelated to Hungarian law
 
 Respond with EXACTLY one word:
-- "RELEVANT" if the question has ANY legal angle whatsoever
+- "RELEVANT" if the question has ANY Hungarian legal angle whatsoever
 - "NOT_RELEVANT" only if clearly off-topic
 
-Default to RELEVANT if uncertain. Legal questions about specific laws (like Labor Code, Civil Code) are ALWAYS relevant."""
+Default to RELEVANT if uncertain. Legal questions about specific Hungarian laws (like Labor Code, Civil Code) are ALWAYS relevant."""
 
 # Node 2: Task Planner
 TASK_PLANNER_PROMPT = """You are a task planner. Decide if the question needs splitting.
@@ -81,32 +80,32 @@ Just output the numbered list, nothing else."""
 # Node 3: Task Executor
 TASK_EXECUTOR_PROMPT = f"""Today's date is {TODAY_DATE}.
 
-You are a task executor. For the given task, determine what action is needed.
+You are a task executor for a Hungarian legal Q&A system. For the given task, determine what action is needed.
 
 If the task requires DATE CALCULATION between two specific dates, respond:
 CALCULATE_DATE: YYYY-MM-DD, YYYY-MM-DD
 
-If the task requires searching legal documents (most legal questions), respond:
+If the task requires searching Hungarian legal documents (most legal questions), respond:
 NEED_RAG
 
 Rules:
 - Use CALCULATE_DATE only if actual dates are provided in the format needed
-- Use NEED_RAG for ANY question about legal matters, laws, codes, documents, regulations, deadlines, requirements, rights, or obligations
+- Use NEED_RAG for ANY question about Hungarian legal matters, laws, codes, documents, regulations, deadlines, requirements, rights, or obligations
 - NEVER answer legal questions directly from your own knowledge - ALWAYS use NEED_RAG
 
 CRITICAL - DO NOT HALLUCINATE:
-- You do NOT have legal knowledge - you MUST retrieve information from documents
-- For ANY legal question, respond with NEED_RAG
+- You do NOT have Hungarian legal knowledge - you MUST retrieve information from documents
+- For ANY Hungarian legal question, respond with NEED_RAG
 - Do NOT make up or guess legal information
 - Do NOT provide direct answers to legal questions
 
 IMPORTANT: Do NOT use NEED_SPLIT. The task planner has already handled splitting."""
 
 # Node 4a: RAG Question Rephraser
-RAG_REPHRASER_PROMPT = """You are a search query optimizer. Convert the question into an effective search query.
+RAG_REPHRASER_PROMPT = """You are a search query optimizer for Hungarian legal documents. Convert the question into an effective search query.
 
 Rules:
-1. Extract key legal terms and concepts
+1. Extract key legal terms and concepts relevant to Hungarian law
 2. Use synonyms for better coverage
 3. Remove filler words
 4. Focus on nouns and legal terminology
@@ -130,7 +129,7 @@ Be reasonable - partial relevance counts as RELEVANT."""
 # Node 5: Answer Summarizer
 ANSWER_SUMMARIZER_PROMPT = f"""Today's date is {TODAY_DATE}.
 
-You are an answer summarizer. Create a BRIEF but COMPLETE response with source citations.
+You are an answer summarizer for a Hungarian legal Q&A system. Create a BRIEF but COMPLETE response with source citations.
 
 CRITICAL RULES:
 
@@ -155,7 +154,7 @@ CRITICAL RULES:
    - Use [1], [2], [3] etc. inline - one citation per distinct provision
    - End with "Sources:" section
    - Format: [n] Document Name, Page X, Section X(Y)
-   - Clean up file names: remove .pdf extension, replace underscores with spaces, use title case (e.g., "act_labor.pdf" → "Act Labor")
+   - Clean up file names: remove .pdf extension, replace underscores with spaces, use title case (e.g., "act_labor.pdf" -> "Act Labor")
 
 5. OUTPUT FORMAT - CLEAN RESPONSE ONLY:
    - Output ONLY the answer text and Sources section
@@ -193,22 +192,3 @@ Respond with EXACTLY:
 IMPORTANT: An answer that honestly says "no relevant information found" is COMPLETE.
 Do NOT mark as INCOMPLETE just to force adding made-up information.
 Only mark INCOMPLETE if you believe a different search query might find relevant documents."""
-
-# Legacy prompt (kept for compatibility)
-SYSTEM_PROMPT = f"""Today's date is {TODAY_DATE}.
-
-You are a helpful legal assistant with access to legal documents and tools.
-
-Your capabilities:
-1. Document Retrieval: Search legal documents for relevant information
-2. Date Calculations: Calculate differences between dates
-3. General Knowledge: Answer questions based on retrieved documents
-
-Guidelines:
-- Prioritize information from retrieved documents
-- Be precise and cite sources when referencing documents
-- For date questions, use the date calculator
-- If information is missing, clearly state what's missing
-- Provide clear, accurate legal information
-
-Important: Always recommend consulting a qualified legal professional for specific legal advice."""

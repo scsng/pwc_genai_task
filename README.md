@@ -45,6 +45,9 @@ The pipeline uses **LangGraph** for stateful, multi-step hybrid agentic workflow
 6. **Answer Summarizer** — Synthesizes answers with proper citations `[n] Document, Page X, Section Y`
 7. **Completeness Check** — Validates answer; triggers replan if incomplete (max 1 replan)
 
+
+Note: the tool calling bas LLama [prompt](/deployment/tool_chat_template_llama3.1_json.jinja) is from VLLMs offical Llama decstiption with some minor changes.
+
 #### Key Design Decisions
 
 - **Strict RAG routing** — Legal questions never answered from LLM knowledge; always retrieves from documents
@@ -111,19 +114,24 @@ Tool caht template is from officakl vllm with a little twist, I choose this beco
 
 ## Testing
 
-I run a quality and performance test. The test notebook is available here: [tests.ipynb](testing/tests.ipynb)
+I run a quality and performance test. The test notebook is available here: [tests.ipynb](testing/tests.ipynb).
+
+For the testing I used Gemini 2.5 Thinking.
 
 ### Quality test
 
-[Input file](testing/input/quality.csv), [Output file](testing/output/quality.csv)
+[Input file](testing/input/quality.csv), [Output file](testing/output/out_quality.csv)
 
-1. Because of the limited amount of time, and ~objective results I used LLM as a judge for the test evaluation . I used Openai GPT-5.2 model for this.
+1. I made the question with the Gemini model based on all the documents (which knowed all the docs). All in all it contains 7 simple and 7 complex questions.
+2. I measured Correctness (1-5), Fluency (1-5), Relevance (1-5), Coverage(1-5)
+3. Because of the limited amount of time, and ~objective results I used LLM as a judge for the test evaluation. To be able to use the eval I used Gemini GEM envirnment. I could have used a notebook, but inclding the documents would have been quite difficult.
+
 
 ### Performance test
 
-[Input file](testing/input/performance.csv), [Output file](testing/output/performance.csv)
+[Input file](testing/input/performance.csv), [Output file](testing/output/out_performance.csv)
 
-* 
+1. For the question generation I used the same method as in the quality test.
 
 
 

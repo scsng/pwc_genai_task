@@ -10,7 +10,7 @@ import logging
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(override=True)
 
 from utils.rag.vector_db import QdrantDB
 
@@ -61,8 +61,14 @@ agentic_workflow = get_agentic_workflow()
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Title
-st.title("⚖️ Legal help")
+# Title and clear chat button in header
+col1, col2 = st.columns([6, 1])
+with col1:
+    st.title("⚖️ Legal help")
+with col2:
+    if st.button("🗑️ Clear", help="Clear chat history"):
+        st.session_state.messages = []
+        st.rerun()
 
 # Display chat history
 for message in st.session_state.messages:
@@ -85,8 +91,12 @@ if prompt := st.chat_input("Ask a legal question..."):
             full_response = ""
             
             # Convert chat history to LangChain messages
+            # Limit to configured number of previous messages (env var CHAT_HISTORY_LIMIT, default 6)
+            history_limit = int(os.getenv("CHAT_HISTORY_LIMIT", "6"))
             chat_history = []
-            for msg in st.session_state.messages[:-1]:  # Exclude the current prompt
+            # Get the last N messages, excluding the current prompt
+            recent_messages = st.session_state.messages[:-1][-history_limit:] if history_limit > 0 else []
+            for msg in recent_messages:
                 if msg["role"] == "user":
                     chat_history.append(HumanMessage(content=msg["content"]))
                 elif msg["role"] == "assistant":

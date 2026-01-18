@@ -44,6 +44,7 @@ class RAGState(TypedDict):
 class AgentState(TypedDict):
     """State for the agentic workflow."""
     messages: List[BaseMessage]
+    chat_history: List[BaseMessage]  # Previous conversation history
     original_question: str
     is_relevant: bool
     subtasks: List[SubTask]
@@ -75,10 +76,11 @@ def create_rag_state(query: str, retry_count: int = 0, **overrides) -> RAGState:
     }
 
 
-def create_initial_state(user_message: str) -> AgentState:
+def create_initial_state(user_message: str, chat_history: List[BaseMessage] = None) -> AgentState:
     """Create the initial workflow state."""
     return {
         "messages": [HumanMessage(content=user_message)],
+        "chat_history": chat_history or [],
         "original_question": user_message,
         "is_relevant": False,
         "subtasks": [],
@@ -123,20 +125,52 @@ class AgenticWorkflow:
         self.graph = self._build_graph()
     
     # ==================== LLM HELPERS ====================
-    def _ask_llm(self, system_prompt: str, user_content: str) -> str:
-        """Send a message to LLM and return the response content."""
-        response = self.llm.invoke([
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_content)
-        ])
+    def _format_chat_history(self, chat_history: List[BaseMessage]) -> str:
+        """Format chat history as a string for inclusion in prompts.
+        
+        Note: The history is already limited by the app layer via CHAT_HISTORY_LIMIT env var.
+        """
+        if not chat_history:
+            return ""
+        
+        formatted = []
+        for msg in chat_history:
+            role = "User" if isinstance(msg, HumanMessage) else "Assistant"
+            # Truncate long messages to keep context manageable
+            content = msg.content[:500] + "..." if len(msg.content) > 500 else msg.content
+            formatted.append(f"{role}: {content}")
+        
+        return "\n".join(formatted)
+    
+    def _ask_llm(self, system_prompt: str, user_content: str, chat_history: List[BaseMessage] = None) -> str:
+        """Send a message to LLM and return the response content.
+        
+        Note: Chat history is already limited by the app layer via CHAT_HISTORY_LIMIT env var.
+        """
+        messages = [SystemMessage(content=system_prompt)]
+        
+        # Include chat history if provided (for context-aware responses)
+        if chat_history:
+            messages.extend(chat_history)
+        
+        messages.append(HumanMessage(content=user_content))
+        response = self.llm.invoke(messages)
         return response.content
     
     # ==================== NODE 1: RELEVANCY CHECKER ====================
     def _relevancy_checker(self, state: AgentState) -> AgentState:
         """Check if question is relevant to our capabilities."""
+        chat_history = state.get("chat_history", [])
+        
+        # Include chat history context if available
+        user_content = f"Question: {state['original_question']}"
+        if chat_history:
+            history_context = self._format_chat_history(chat_history)
+            user_content = f"Previous conversation:\n{history_context}\n\nCurrent question: {state['original_question']}"
+        
         response = self._ask_llm(
             RELEVANCY_CHECKER_PROMPT,
-            f"Question: {state['original_question']}"
+            user_content
         )
         return {**state, "is_relevant": check_relevance_keyword(response)}
     
@@ -154,6 +188,7 @@ class AgenticWorkflow:
         task_to_split = state.get("task_to_split")
         existing_subtasks = list(state.get("subtasks", []))
         current_idx = state.get("current_task_idx", 0)
+        chat_history = state.get("chat_history", [])
         
         # Determine what question to plan
         if task_to_split:
@@ -164,9 +199,15 @@ class AgenticWorkflow:
             if failed:
                 question_to_plan += "\n\nPreviously failed:\n" + "\n".join(failed)
         
+        # Build user content with chat history context
+        user_content = f"Question: {question_to_plan}"
+        if chat_history and not task_to_split:
+            history_context = self._format_chat_history(chat_history)
+            user_content = f"Previous conversation (for context):\n{history_context}\n\nCurrent question to plan: {question_to_plan}"
+        
         # Get subtasks from LLM
         prompt = TASK_PLANNER_PROMPT.format(max_task_count=self.max_task_count)
-        response = self._ask_llm(prompt, f"Question: {question_to_plan}")
+        response = self._ask_llm(prompt, user_content)
         
         # Parse subtasks from numbered list
         new_subtasks = self._parse_subtasks(response, question_to_plan)
@@ -368,13 +409,20 @@ class AgenticWorkflow:
     def _answer_summarizer(self, state: AgentState) -> AgentState:
         """Summarize all subtask answers into final answer."""
         answers = [t["answer"] for t in state["subtasks"] if t["answer"]]
+        chat_history = state.get("chat_history", [])
         
         if not answers:
             return {**state, "final_answer": "I couldn't find an answer to your question."}
         
+        # Build user content with chat history for context-aware summarization
+        user_content = f"Original Question: {state['original_question']}\n\nSubtask Answers:\n{chr(10).join(answers)}"
+        if chat_history:
+            history_context = self._format_chat_history(chat_history)
+            user_content = f"Previous conversation (for context - helps understand follow-up questions):\n{history_context}\n\n{user_content}"
+        
         response = self._ask_llm(
             ANSWER_SUMMARIZER_PROMPT,
-            f"Original Question: {state['original_question']}\n\nSubtask Answers:\n{chr(10).join(answers)}"
+            user_content
         )
         return {**state, "final_answer": response}
     
@@ -462,19 +510,31 @@ class AgenticWorkflow:
     
     # ==================== The chat flow ====================
     @observe(name="chat")
-    def invoke(self, user_message: str, chat_history: list = None) -> str:
-        """Invoke the workflow and return final answer."""
+    def invoke(self, user_message: str, chat_history: List[BaseMessage] = None) -> str:
+        """Invoke the workflow and return final answer.
+        
+        Args:
+            user_message: The current user message/question
+            chat_history: List of previous messages (HumanMessage/AIMessage) for context
+        """
         config = RunnableConfig(callbacks=[self.langfuse_handler])
-        final_state = self.graph.invoke(create_initial_state(user_message), config=config)
+        initial_state = create_initial_state(user_message, chat_history)
+        final_state = self.graph.invoke(initial_state, config=config)
         return final_state.get("final_answer", "I couldn't generate a response.")
     
     @observe(name="chat")
-    def stream(self, user_message: str, chat_history: list = None):
-        """Stream the workflow, yielding node events and final answer."""
+    def stream(self, user_message: str, chat_history: List[BaseMessage] = None):
+        """Stream the workflow, yielding node events and final answer.
+        
+        Args:
+            user_message: The current user message/question
+            chat_history: List of previous messages (HumanMessage/AIMessage) for context
+        """
         config = RunnableConfig(callbacks=[self.langfuse_handler])
+        initial_state = create_initial_state(user_message, chat_history)
         final_answer = ""
         
-        for event in self.graph.stream(create_initial_state(user_message), config=config, stream_mode="updates"):
+        for event in self.graph.stream(initial_state, config=config, stream_mode="updates"):
             for node_name, node_output in event.items():
                 yield {"type": "node", "node": node_name, "display_name": NODE_DISPLAY_NAMES.get(node_name, node_name)}
                 

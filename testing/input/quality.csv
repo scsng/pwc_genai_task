@@ -1,1 +1,16 @@
-TopicQuestionAnswerCorrectness (0-5)Style (0-5)Covering the answer (0-5)
+Topic;Complex (yes,no);Question;Answer;Correctness (1-5);Fluency (1-5);Relevance (1-5);Coverage(1-5);Short review
+Criminal Law;no;What is the principle of legality according to Section 1 of the Hungarian Criminal Code?;;;;;;
+Criminal Law;yes;Explain the difference between intentional and negligent commission of a criminal offence. How does the 'liability for result' affect qualifying circumstances?;;;;;;
+Civil Law;no;According to the Civil Code, when does a person reach majority and what happens if a marriage is declared invalid?;;;;;;
+Civil Law;yes;Distinguish between legal capacity and capacity to act under the Civil Code. What specific juridical acts can a minor with limited capacity to act perform without their statutory representative?;;;;;;
+Public Procurement;no;What language requirements apply to public procurement procedures in Hungary according to Act CXLIII of 2015?;;;;;;
+Public Procurement;yes;How is 'innovation' defined in the Public Procurement Act, and what are the specific exclusions from the definition of a 'subcontractor'?;;;;;;
+Labor Law;no;According to Section 2 of the Labor Code, what specific groups and entities are covered by the Act?;;;;;;
+Labor Law;yes;Under what conditions can an employer restrict a worker's personal rights, and what conduct is a worker prohibited from engaging in regarding the employer's reputation and economic interests?;;;;;;
+Fundamental Law;yes;Describe the core principles of Hungary's statehood including the source of power, the form of government, and the State's position on the 1949 communist constitution as stated in the National Avowal.;;;;;;
+Legal Principles;yes;Compare how the principle of 'good faith and fair dealing' is described across the Civil Code, Labor Code, and Public Procurement Act.;; it's breached by conduct contrary to previous reliance. Labor Code (6(2)): Parties must act consistent with good faith and fairness, cooperate, and not breach the other's rights. Public Procurement Act (2(3)): Authorities and economic operators must proceed in line with good faith and fair dealing, and the abuse of rights is prohibited.;;;
+Criminal Law;yes;In which specific cases does Hungarian criminal law apply to acts committed abroad by persons who are not Hungarian nationals?;;;;;;
+Agentic RAG Project;no;What are the requirements for the 'Modellválasztás' (Model Selection) in the Medior AI Engineer project?;;;;;;
+Agentic RAG Project;yes;Outline the architectural requirements for the LangGraph workflow and the specific components that must be included in the 'Értékelés és Teljesítményelemzés' (Evaluation and Performance Analysis) section.;;;;;;
+Civil Law;no;What is the legal status of a human foetus and who is entitled to request the appointment of its guardian?;;;;;;
+Agentic RAG Project;yes;What are the rules for integrating 'Tools' and the 'RAG Alrendszer' (RAG Subsystem) into the agentic workflow for the Medior task?;;;;;;
