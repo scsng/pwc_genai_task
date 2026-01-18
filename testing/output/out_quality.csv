@@ -1,0 +1,176 @@
+Topic;Complex (yes,no);Question;Answer;Correctness (1-5);Fluency (1-5);Relevance (1-5);Coverage(1-5);Short review
+Criminal Law;no;What is the principle of legality according to Section 1 of the Hungarian Criminal Code?;"The principle of legality according to Section 1 of the Hungarian Criminal Code is that the criminal liability of the perpetrator shall be established only for an act which was punishable under an Act at the time of commission, except for acts punishable under the generally recognised rules of international law [1].
+
+Sources:
+[1] Act C of 2012 on the Criminal Code, Page 2, Section 1(1)";5;5;5;5;The answer perfectly and accurately quotes the principle of legality as defined in Section 1 of the Hungarian Criminal Code, including the specific exception. It is highly relevant and well-written.
+Criminal Law;yes;Explain the difference between intentional and negligent commission of a criminal offence. How does the 'liability for result' affect qualifying circumstances?;"The difference between intentional and negligent commission of a criminal offence lies in the level of awareness and intent behind the act.
+
+Intentional commission of a criminal offence refers to acts committed with the intention of causing harm or violating the law, as stated in Section 3(1) of the Act C of 2012 on the Criminal Code [1]. On the other hand, negligent commission of a criminal offence refers to acts committed without the intention of causing harm, but still resulting in a violation of the law, as stated in Article XXVIII(4) of the Fundamental law [2].
+
+The 'liability for result' affects qualifying circumstances in the following ways: Liability for result as a qualifying circumstance is governed by Section 9 of the Act C of 2012 on the Criminal Code [1]. According to this provision, the more severe legal consequences attached to the result of a criminal offence shall only be applied if the perpetrator was at least negligent regarding the result.
+
+Additionally, liability for hazardous operations is governed by Section 6:535 of the Act V of 2013 on the Civil Code [2], which states that a person carrying out hazardous activities shall compensate for the resulting damage, unless they can prove that the damage was caused by an unavoidable event outside the scope of the hazardous activity.
+
+Furthermore, liability in damages in the event of gratuitous contracts is addressed in Section 6:147 of the Act V of 2013 on the Civil Code [3], which states that the person undertaking the performance of a service free of charge shall be liable for the damage incurred in the subject of the service if the obligee proves that the obligor caused the damage by an intentional breach of contract, or failed to provide information on a substantial characteristic of the service which was unknown to the obligee.
+
+Finally, when establishing responsibility and/or the amount of damages, all circumstances of the case shall be taken into consideration, including those affecting the employee's liability and which may have influenced the safe and proper administration of inventories, as stated in Section 187 of the Act I of 2012 on the Labor Code [4].
+
+Sources:
+[1] Act C of 2012 on the Criminal Code, Page 2, Section 3(1)
+[2] Fundamental law, Page 15, Article XXVIII(4)
+[3] Act V of 2013 on the Civil Code, Page 234, Section 6:147
+[4] Act I of 2012 on the Labor Code, Page 55,";2;5;2;3;The answer correctly defines intentional acts and explains 'liability for result' in criminal law, but contains a major factual error by citing the Fundamental Law for negligent commission instead of the Criminal Code. It also includes extensive irrelevant information from civil and labor law, significantly detracting from its relevance and focus on criminal law.
+Civil Law;no;According to the Civil Code, when does a person reach majority and what happens if a marriage is declared invalid?;"A person reaches majority at the age of 18 according to the Fundamental Law [1]. However, this information is not explicitly stated in the Civil Code.
+
+Regarding the declaration of invalid marriage, the Hungarian Civil Code provides rules for this situation. According to Section 4:14 [1], a marriage may be considered as invalid if its invalidity is established by the court in an action brought for this end. A judgment establishing the invalidity of a marriage shall be effective against all [2]. An invalid marriage shall attract the legal consequences set out in this Act [3].
+
+If the marriage is annulled, property claims may be enforced by either spouse as if the marriage had been dissolved by the court at the time of the establishment of its invalidity [4]. If its invalidity was established after the death of one of the spouses, property claims may be enforced as if the marriage had terminated upon the death of that spouse [4].
+
+An action for annulment may be brought either during the marriage or after the termination of the marriage [5]. Unless otherwise provided in this Act, an action for annulment may be brought by either spouse, the prosecutor or any person with a legal interest in the establishment of the invalidity of the marriage [5].
+
+If both spouses acted in good faith upon the conclusion of an invalid marriage, the property consequences of the marriage shall be identical to the property effect of a valid marriage [6].
+
+It is worth noting that an action for annulment may be brought within six months of the termination of incapacity, starting on the day when the spouse regains his capacity to act, on the ground of having no capacity to act at the time of the conclusion of marriage [7].
+
+Sources:
+[1] Fundamental Law, Page 16, Section 4
+[2] Act V of 2013 on the Civil Code, Page 112, Section 4:14
+[3] Act V of 2013 on the Civil Code, Page 112, Section 4:14
+[4] Act V of 2013 on the Civil Code, Page 117, Section 4:36
+[5] Act V of 2013 on the Civil Code, Page 112, Section 4:15
+[6] Act V of 2013 on the Civil Code, Page 117, Section 4:36
+[7] Act V of 2013 on the Civil Code, Page 113, Section 4:16";5;5;5;5;The answer is highly accurate, correctly identifying the age of majority and its source, and providing a comprehensive overview of the legal consequences and procedures for an invalid marriage under the Hungarian Civil Code. The writing is clear, professional, and well-sourced.
+Civil Law;yes;Distinguish between legal capacity and capacity to act under the Civil Code. What specific juridical acts can a minor with limited capacity to act perform without their statutory representative?;"The legal capacity and capacity to act are two distinct concepts under the Civil Code. Legal capacity refers to the ability of a person to enter into legal relationships and perform legal acts, as defined in the Civil Code [1]. This includes the capacity to conclude contracts, make wills, and perform other legal acts. Capacity to act, on the other hand, refers to the ability of a person to perform a specific legal act, such as concluding a contract or making a will [2]. This capacity may be affected by factors such as age, mental capacity, or other circumstances that may impact a person's ability to perform a particular legal act.
+
+In summary, legal capacity is a broader concept that encompasses the ability to enter into legal relationships and perform legal acts, while capacity to act is a more specific concept that refers to the ability to perform a particular legal act.
+
+A minor with limited capacity to act can perform certain juridical acts without their statutory representative. According to Section 2:15, when making juridical acts that affect the minor himself or his property, statutory representatives shall take the views of the minor having no capacity to act but of sound mind into account in accordance with the age and maturity of the minor [3]. Additionally, minors having limited capacity to act and persons having partially limited capacity to act in terms of juridical acts concerning the establishment of parentage may bring an action subject to the consent of their statutory representative [4].
+
+Sources:
+[1] Fundamental law, Page 35, Section X
+[2] Act C of 2012 on the Criminal Code, Page 28, Section X
+[3] Act V of 2013 on the Civil Code, Page 5, Section 2:15
+[4] Act V of 2013 on the Civil Code, Page 133, Section 2(2)";1;4;2;1;The answer provides an inaccurate distinction between legal capacity and capacity to act, citing an irrelevant Criminal Code section. It completely fails to identify juridical acts a minor can perform without a representative, misinterpreting the cited Civil Code sections which either require representative action or consent.
+Public Procurement;no;What language requirements apply to public procurement procedures in Hungary according to Act CXLIII of 2015?;"The Hungarian language is the primary language requirement for public procurement procedures in Hungary. According to the Act CXLIII of 2015 on public procurement, public procurement procedures shall be conducted in the Hungarian language [1]. However, contracting authorities may permit, but shall not require, the use of a language other than Hungarian [2]. 
+
+Exceptions to this rule include situations where the application of public procurement rules would oblige Hungary to transfer information contrary to essential interests related to State security or where the fundamental security and national security interests of Hungary cannot be guaranteed by security measures available in public procurement procedures [3]. In such cases, the language requirements may be adjusted accordingly.
+
+The key provisions of Act CXLIII of 2015 regarding public procurement procedures include:
+
+The Act aims to ensure transparency and public controllability of the use of public funds and establish the conditions for fair competition in public procurement procedures [1]. It also facilitates the participation of local small and medium-sized enterprises in public procurement procedures and the achievement of environmental and social objectives of the state [1].
+
+Section 5(3) and Section 62(5a) of the Act, as introduced by Act LXIII of 2016, apply to procurements and public procurement procedures launched and contracts awarded after the entry into force of the Amending Act [2].
+
+Public procurement organisations are required to provide information under the framework of keeping contact with public procurement organisations in other Member States of the European Union, including certificates used in public procurement procedures and public databases and registers operated in Hungary [3].
+
+The detailed rules pertaining to the authorisation of the launch and conducting the central control of public procurements undertaken by budgetary bodies and their institutions, controlled or supervised by them, are also established [4].
+
+Sources:
+[1] Act CXLIII of 2015 on public procurement, Page 2, Section 6
+[2] Act CXLIII of 2015 on public procurement, Page 2
+[3] Act CXLIII of 2015 on public procurement, Page 10
+[4] Act CXLIII of 2015 on public procurement, Page 10
+[5] Act CXLIII of 2015 on public procurement, Page 10";3;5;2;2;The answer correctly identifies the primary language requirements but then includes significant irrelevant information about other provisions of the Act, diluting its focus. The interpretation of state security exceptions regarding language is also slightly off.
+Public Procurement;yes;How is 'innovation' defined in the Public Procurement Act, and what are the specific exclusions from the definition of a 'subcontractor'?;"The Public Procurement Act does not explicitly define 'innovation'. However, it mentions the 'innovation partnership' as a type of public procurement procedure that may be used for purposes specified in the Act [1]. 
+
+The specific exclusions from the definition of a 'subcontractor' are:
+
+* Any part (parts) of the concession for the fulfilment of which a tenderer (candidate) intends to use a subcontractor [1].
+* The subcontractors to be used for such parts, where already known at the time of submitting the tender or request to participate [2].
+
+Beyond these provisions, the provided documents do not specify further details on the definition of 'innovation' or exclusions from the definition of a 'subcontractor'.
+
+Sources:
+[1] Act CXLIII of 2015 on public procurement, Page 97
+[2] Act CXLIII of 2015 on public procurement, Page 97";2;5;3;2;The answer correctly states that 'innovation' is not explicitly defined but mentions 'innovation partnership'. However, it significantly misinterprets the request for 'exclusions from the definition of a subcontractor' by providing rules about identifying subcontractors in concessions, which are not definitional exclusions.
+Labor Law;no;According to Section 2 of the Labor Code, what specific groups and entities are covered by the Act?;"The Hungarian Labor Code covers the following groups and entities:
+
+An 'employee' is any natural person who works under an employment contract [1]. This includes workers who are at least sixteen years of age [2]. However, persons of at least fifteen years of age receiving full-time school education may enter into an employment relationship during school holidays [3].
+
+An 'employer' is any person having the capacity to perform legal acts who is party to employment contracts with employees [4].
+
+Sources:
+[1] Act I of 2012 on the Labor Code, Page 12, Section 34(1)
+[2] Act I of 2012 on the Labor Code, Page 12, Section 34(2)
+[3] Act I of 2012 on the Labor Code, Page 12, Section 34(2)
+[4] Act I of 2012 on the Labor Code, Page 11, Section 33";2;5;3;2;The answer correctly identifies employees and employers as covered entities and provides accurate definitions from the Hungarian Labor Code. However, it incorrectly attributes these detailed definitions to Section 2, which primarily outlines the general scope of the Act rather than defining specific terms.
+Labor Law;yes;Under what conditions can an employer restrict a worker's personal rights, and what conduct is a worker prohibited from engaging in regarding the employer's reputation and economic interests?;"The Hungarian Labor Code allows an employer to restrict a worker's personal rights in certain situations. According to the Fundamental Law of Hungary, the functioning of the Hungarian State shall be based on the principle of the division of powers [4]. However, no one shall act with the aim of acquiring or exercising power by force, and of exclusively possessing it [5]. Everyone shall have the right and obligation to resist such attempts in a lawful way [5].
+
+An employer can restrict a worker's personal rights when the worker's conduct jeopardizes the employer's economic interests. The worker is prohibited from engaging in conduct that infringes upon or jeopardizes the rightful economic interests of the employer, as stated in Section 228(1) of the Act I of 2012 on the Labor Code [6]. This includes any conduct that may harm the employer's economic interests for up to two years following termination of the employment relationship.
+
+Sources:
+[4] Fundamental Law, Page 4, Article A)
+[5] Fundamental Law, Page 4, Article A) (1) and (2)
+[6] Act I of 2012 on the Labor Code, Page 69, Section 228(1)";2;3;2;2;The answer includes a significant amount of irrelevant information from the Fundamental Law that does not address the question. While it correctly identifies one condition for restricting personal rights and some prohibited conduct regarding economic interests, it fails to cover other conditions and completely omits the aspect of employer reputation.
+Fundamental Law;yes;Describe the core principles of Hungary's statehood including the source of power, the form of government, and the State's position on the 1949 communist constitution as stated in the National Avowal.;"The core principles of Hungary's statehood are based on the division of powers, as stated in Article A) of the Fundamental Law [1]. This principle ensures that no one can acquire or exercise power by force, and everyone has the right and obligation to resist such attempts in a lawful way [2]. The source of power in Hungary's government is the people, as specified in Article A) of the Fundamental Law [3]. The power shall be exercised by the people through elected representatives or, in exceptional cases, directly [4]. The form of government in Hungary is a republic, as stated in Article A) of the Fundamental Law [5]. Furthermore, Hungary's criminal law applies to acts committed by persons other than Hungarian nationals abroad, if the act constitutes a criminal offence under Hungarian law and is also punishable under the law of the place where it was committed [6]. The country also exercises some of its competences arising from the Fundamental Law jointly with other Member States, through the institutions of the European Union, to the extent necessary to exercise the rights and fulfil the obligations deriving from the Founding Treaties [7]. Moreover, Hungary bears responsibility for the fate of Hungarians living beyond its borders and shall facilitate their survival and development, support their efforts to preserve their Hungarian identity, and promote their cooperation with each other and with Hungary [8]. The National Avowal of Hungary's Fundamental Law honors the achievements of Hungary's historic constitution and the Holy Crown, which embodies the constitutional continuity of Hungary's statehood and the unity of the nation [9].
+
+Sources:
+[1] Fundamental law, Page 4, Section 1
+[2] Fundamental law, Page 4, Section 2
+[3] Fundamental Law, Page 4, Article A)
+[4] Fundamental Law, Page 4, Article A) (4)
+[5] Fundamental Law, Page 4, Article A)(2)
+[6] Act C of 2012 on the Criminal Code, Page 2, Section (2)
+[7] Fundamental law, Page 5, Section (2)
+[8] Fundamental law, Page 4, Section Article A)
+[9] Fundamental Law, Page 3, NATIONAL AVOWAL";2;5;2;2;The answer correctly identifies the source of power and form of government but completely misrepresents Hungary's position on the 1949 communist constitution as stated in the National Avowal. It also includes several irrelevant details that detract from the core question.
+Legal Principles;yes;Compare how the principle of 'good faith and fair dealing' is described across the Civil Code, Labor Code, and Public Procurement Act.;"The principle of 'good faith and fair dealing' is described in the Civil Code, Labor Code, and Public Procurement Act as follows:
+
+In the Civil Code, parties shall act upon the requirement of good faith and fair dealing when exercising rights and fulfilling obligations [1]. The requirement of good faith and fair dealing is also breached by the person whose exercise of rights is contrary to his previous conduct upon which the other party could reasonably rely on [2].
+
+In the Labor Code, parties shall also act upon the requirement of good faith and fair dealing when exercising rights and fulfilling obligations [1]. The requirement of good faith and fair dealing is also breached by the person whose exercise of rights is contrary to his previous conduct upon which the other party could reasonably rely on [2]. Additionally, with regard to contracts between undertakings, the obligee may contest, as unfair clauses, contract terms that depart from the provisions of this section unilaterally and unreasonably to the detriment of the obligee by violating the principle of good faith and fair dealing [3]. Organisations engaged in the representation of the interests of undertakings may also contest, pursuant to the rules of the Code of Civil Procedure on actions brought in the public interest, as unfair a clause that becomes, as a standard contract term, a part of the contract between undertakings and sets forth unilaterally, unreasonably and to the detriment of the obligee the time for performance of a pecuniary debt or the rate and due date of the default interest by violating the principle of good faith and fair dealing [4].
+
+In the Public Procurement Act, contracting authorities and economic operators shall be obliged to proceed in public procurement procedures in line with the requirements of good faith and fair dealing. The abuse of rights shall be prohibited [1]. This principle is also mentioned in the Civil Code, which states that parties shall act upon the requirement of good faith and fair dealing when exercising rights and fulfilling obligations [2]. Furthermore, the Civil Code specifies that the requirement of good faith and fair dealing is breached by the person whose exercise of rights is contrary to his previous conduct upon which the other party could reasonably rely on [3].
+
+Sources:
+[1] Act V of 2013 on the Civil Code, Page 2, Section 1:3(1)
+[2] Act V of 2013 on the Civil Code, Page 2, Section 1:3(2)
+[3] Act V of 2013 on the Civil Code, Page 2, Section ";2;5;3;2;The answer is well-written and fluent, but contains significant factual errors in attributing provisions to the incorrect legal acts, especially for the Labor Code. All sources provided point exclusively to the Civil Code, undermining the comparison across different codes and leading to poor coverage of specific descriptions within the Labor Code and Public Procurement Act.
+Criminal Law;yes;In which specific cases does Hungarian criminal law apply to acts committed abroad by persons who are not Hungarian nationals?;"Hungarian criminal law applies to acts committed abroad by persons who are not Hungarian nationals in the following specific cases:
+
+Hungarian criminal law applies to acts committed by persons other than Hungarian nationals abroad if the act constitutes a criminal offence under Hungarian law and is also punishable under the law of the place where it was committed [1]. Additionally, Hungarian criminal law applies to acts committed by persons other than Hungarian nationals abroad against a Hungarian national, or a legal person or other legal entity without legal personality established under Hungarian law, which are punishable under the Hungarian law [2]. Furthermore, Hungarian criminal law applies to acts committed by Hungarian nationals abroad if the act constitutes a criminal offence under Hungarian law [3].
+
+Sources:
+[1] Act C of 2012 on the Criminal Code, Page 2, Section 3(2)
+[2] Act C of 2012 on the Criminal Code, Page 3, Section 3
+[3] Act C of 2012 on the Criminal Code, Page 2, Section 3(1)";2;5;2;2;The answer correctly identifies two scenarios for non-Hungarian nationals but incorrectly includes a provision for Hungarian nationals, which is outside the scope of the question. It also misses other significant scenarios where Hungarian criminal law applies to non-nationals for acts committed abroad.
+Agentic RAG Project;no;What are the requirements for the 'Modellválasztás' (Model Selection) in the Medior AI Engineer project?;"The requirements for the 'Modellválasztás' (Model Selection) in the Medior AI Engineer project are not explicitly mentioned in the provided documents. However, based on the content of the subtask answers, it can be inferred that the model selection process may involve the following steps:
+
+1. The Council operating within the Authority, which includes a person designated jointly by the president of the Chamber of Hungarian Engineers and the president of the Chamber of Hungarian Architects, and a person designated by the professional body of responsible accredited procurement consultants [1].
+2. The public service activity, which includes cases where the public procurement procedure of a contracting entity pursuing a drinking water-related activity is connected with a hydraulic engineering project, irrigation, or land drainage [2].
+3. The performance of the project company, which may be used as reference or turnover certifying suitability by any owner of the project company who was actually involved in such performance [3].
+
+The process for selecting a model in the Medior AI Engineer project is not explicitly mentioned in the provided documents. However, it can be inferred that the parties used a model employment contract to conclude the occasional work employment contract, as stated in Section 60 of Act I of 2012 on the Labor Code [1].
+
+The provided documents do not mention specific model evaluation metrics used in the Medior AI Engineer project. The topics discussed in the subtask answers are related to international law, public procurement, criminal law, and the territorial and personal scope of Hungarian law, but none of them are related to model evaluation metrics.
+
+The Medior AI Engineer project does not have specific documentation or guidelines for model selection in the provided documents. However, there are some relevant provisions related to public procurement and selection criteria that might be applicable.
+
+According to Act CXLIII of 2015 on public procurement, technical specifications should ensure equal access for economic operators and not create unjustified obstacles to competition [1]. The detailed rules for determining and contents of technical specifications are laid down in a separate law [2].
+
+The selection criteria should be clearly specified in the call for competition or in the procurement documents [3]. The contracting authority is entitled to decide not to specify any selection criteria regarding technical and professional suitability only in exceptional cases justified in the procurement documents [4]. In such cases, the application of any such selection criteria is unnecessary for adequate performance.
+
+Contracting authorities should provide guidance in the procurement documents as to the level of details economic operators are required to provide in the European Single Procurement Document regarding their compliance with the selection criteria [5].
+
+Sources";1;4;1;1;The answer fundamentally misunderstands 'Modellválasztás' (Model Selection) in an AI engineering context, providing information related to public procurement, labor law, and hydraulic engineering instead of AI/ML model selection criteria. While grammatically fluent, the content is almost entirely irrelevant and factually incorrect in its application to the question.
+Agentic RAG Project;yes;Outline the architectural requirements for the LangGraph workflow and the specific components that must be included in the 'Értékelés és Teljesítményelemzés' (Evaluation and Performance Analysis) section.;"I'm a Hungarian legal assistant that can help you with:
+- Searching Hungarian legal documents for specific information
+- Calculating date differences (deadlines, timeframes)
+- Answering questions about Hungarian law from my document corpus
+
+Please ask me a question related to these capabilities.";1;5;1;1;The AI provided a generic self-introduction and capabilities list instead of answering the specific question about LangGraph architectural requirements and evaluation components. It completely failed to address the prompt.
+Civil Law;no;What is the legal status of a human foetus and who is entitled to request the appointment of its guardian?;"The legal status of a human foetus is not explicitly mentioned in the provided documents, but it implies a certain level of protection for the unborn child due to the protection and care necessary for a child's proper physical, mental, and moral development as mentioned in Article XVI of the Fundamental Law of Hungary [1, 2].
+
+The Hungarian Civil Code (Act V of 2013) states that the guardianship authority shall appoint a guardian to the human foetus if it is necessary to protect the rights of the foetus [3]. The appointment of a guardian may be requested by a parent or grandparent of the foetus, or by the prosecutor or the local government clerk [4].
+
+Sources:
+[1] Fundamental law, Page 12, Article XVI(1)
+[2] Fundamental law, Page 12, Article XVI(2)
+[3] Act V of 2013 on the Civil Code, Page 3, Section 2:3
+[4] Act V of 2013 on the Civil Code, Page 3, Section 2:3(2)";5;5;5;5;The answer accurately details the legal status of a human foetus under Hungarian law, referencing both the Fundamental Law and the Civil Code. It correctly identifies all parties entitled to request the appointment of a guardian, providing comprehensive and well-written information.
+Agentic RAG Project;yes;What are the rules for integrating 'Tools' and the 'RAG Alrendszer' (RAG Subsystem) into the agentic workflow for the Medior task?;"I'm a Hungarian legal assistant that can help you with:
+- Searching Hungarian legal documents for specific information
+- Calculating date differences (deadlines, timeframes)
+- Answering questions about Hungarian law from my document corpus
+
+Please ask me a question related to these capabilities.";1;5;1;1;The AI provided a generic self-introduction of its capabilities as a legal assistant, completely failing to address the technical question about integrating tools and the RAG subsystem into an agentic workflow.

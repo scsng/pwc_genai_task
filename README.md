@@ -157,6 +157,17 @@ The test notebook is available here: [quality_tests.ipynb](testing/quality_tests
 3. Because of the limited amount of time, and ~objective results I used LLM as a judge for the test evaluation. 
 
 
+| Metric      | Mean | Std  | Min | Max |
+|-------------|------|------|-----|-----|
+| Correctness | 2.40 | 1.45 |  1  |  5  |
+| Fluency     | 4.73 | 0.59 |  3  |  5  |
+| Relevance   | 2.60 | 1.40 |  1  |  5  |
+| Coverage    | 2.40 | 1.45 |  1  |  5  |
+
+These results indicate that while the system performed very well in terms of fluency, there is room for improvement in correctness, relevance, and coverage in its responses.
+
+
+
 ### Performance test
 
 [Input file](testing/input/performance.csv), [Output file](testing/output/out_performance.csv)
