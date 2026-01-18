@@ -82,26 +82,31 @@ fi
 
 echo ""
 echo "=== Starting vLLM Server ==="
-echo "Model: google/gemma-3n-E4B-it"
+echo "Model: google/gemma-3-4b-it"
 echo "Host: 0.0.0.0"
 echo "Port: 8088"
 echo "GPU Memory Utilization: 0.85 (85%)"
-echo "Max Model Length: 2048"
+echo "Max Model Length: 3072"
 echo "Max Num Seqs: 5"
 echo "Prefix Caching: Disabled"
 echo ""
+echo "Note: The GGUF version (google/gemma-3-4b-it-qat-q4_0-gguf) is not"
+echo "      compatible with vLLM. Using the base Hugging Face format model instead."
+echo ""
 
-# Run vLLM serve
-# Note: KV cache is required and cannot be disabled, but with 85% GPU memory
-# utilization, there should be sufficient room for both model weights and KV cache
-vllm serve google/gemma-3n-E2B-it \
-    --host 127.0.0.1\
+
+# Note: vLLM does not support GGUF format models. Use the base HF model instead.
+vllm serve nvidia/Llama-3.1-8B-Instruct-FP8\
+    --host 0.0.0.0 \
     --port 8088 \
     --gpu-memory-utilization 0.85 \
     --max-model-len 3072 \
     --max-num-seqs 5 \
     --no-enable-prefix-caching \
     --limit-mm-per-prompt '{"image": 0}' \
-    --kv-cache-dtype auto 
+    --kv-cache-dtype auto \
+    --enable-auto-tool-choice \
+    --tool-call-parser llama3_json \
+    --chat-template ./tool_chat_template_llama3.1_json.jinja
 
  
