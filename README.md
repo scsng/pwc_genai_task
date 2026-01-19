@@ -99,10 +99,10 @@ Note: The tool calling Llama [prompt](/deployment/tool_chat_template_llama3.1_js
 2. There are two .env.example files, in the main & in the deployment folder. 
 
    1. Copy them as .env files.
-   2. You can use your HuggingFace token, or you can use my temporary one, I sent in the email.
 
 3. Run the [./deployment/docker-compose.yaml](./deployment/docker-compose.yaml ) file.
 
+**In case the docker compose app is not working properly.**
 4. Starting the VLLM inference service and the docker containers.
 
    ```bash

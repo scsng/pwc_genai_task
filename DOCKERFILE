@@ -1,9 +1,10 @@
-# First, build the application in the `/app` directory
-FROM python:3.12 AS builder
+# Build stage with uv for dependency management
+FROM python:3.13-slim AS builder
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
-# The installer requires curl (and certificates) to download the release archive
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
+# Install curl for downloading uv
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -14,10 +15,10 @@ WORKDIR /app
 # Copy only dependency files first for better caching
 COPY ./pyproject.toml ./uv.lock ./
 
-# Create virtual environment (this layer will be cached and reused)
+# Create virtual environment
 RUN uv venv
 
-# Install dependencies (this layer will be cached when dependencies don't change)
+# Install dependencies with cache mount for faster rebuilds
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install -r pyproject.toml --extra-index-url https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match && \
     (uv pip uninstall docling || true) && \
@@ -25,33 +26,64 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     .venv/bin/python -c "import tiktoken; tiktoken.encoding_for_model('gpt-4o')" && \
     .venv/bin/python -c "from tqdm import tqdm; import multiprocessing; tqdm._lock = multiprocessing.RLock(); from langchain_qdrant import FastEmbedSparse; FastEmbedSparse(model_name='Qdrant/bm25')"
 
-# Then, use a final image without uv
-FROM python:3.12-slim
+# Final runtime image
+FROM python:3.13-slim
 
-# Create user for security
+# Install curl for healthcheck, bash for entrypoint, and OpenCV dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    bash \
+    libgl1 \
+    libglib2.0-0 \
+    libxcb1 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
 RUN addgroup --system appgroup && \
     adduser --system --ingroup appgroup --home /home/appuser appuser
 
-WORKDIR /genai
+WORKDIR /app
 
 # Copy the virtual environment from the builder
-COPY --from=builder --chown=appuser:appgroup /app/.venv /genai/.venv
+COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
 
-# Copy application files directly to final image (not from builder)
-COPY --chown=appuser:appgroup ./alembic.ini ./alembic.ini
-COPY --chown=appuser:appgroup ./alembic ./alembic
-COPY --chown=appuser:appgroup ./app ./app
+# Copy application files
+COPY --chown=appuser:appgroup ./app.py ./app.py
+COPY --chown=appuser:appgroup ./init.py ./init.py
+COPY --chown=appuser:appgroup ./utils ./utils
 COPY --chown=appuser:appgroup ./entrypoint.sh ./entrypoint.sh
 
-# Place virtual environment executables in the path
-ENV PATH="/genai/.venv/bin:$PATH"
+# Make entrypoint executable
+RUN chmod +x /app/entrypoint.sh
+
+# Create data directory for marker file
+RUN mkdir -p /app/data && chown appuser:appgroup /app/data
+
+# Set environment variables
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
+# Streamlit configuration
+ENV STREAMLIT_SERVER_PORT=8501
+ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
+ENV STREAMLIT_SERVER_HEADLESS=true
 # Increase OTLP exporter timeout for langfuse
 ENV OTEL_EXPORTER_OTLP_TIMEOUT=20
+# Init configuration
+ENV INIT_MARKER_PATH=/app/data/.initialized
+ENV FORCE_REINIT=false
 
-# Switch to appuser for security
+# Switch to non-root user
 USER appuser
 
-# Make entrypoint executable
-RUN chmod +x entrypoint.sh
+# Expose Streamlit port
+EXPOSE 8501
 
-CMD ["/bin/bash", "-c", "/genai/entrypoint.sh"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8501/_stcore/health || exit 1
+
+# Run entrypoint script
+ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]

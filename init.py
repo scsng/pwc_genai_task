@@ -52,7 +52,7 @@ def main():
         qdrant_db=QdrantDB(
             embedding_model=os.getenv("EMBEDDING_MODEL"),
             collection_name=os.getenv("COLLECTION_NAME"), 
-            qdrant_host=os.getenv("QDRANT_HOST"), 
+            qdrant_host=os.getenv("QDRANT_URL"), 
             qdrant_api_key=os.getenv("QDRANT_API_KEY") ,
             top_k=os.getenv("TOP_K")
         )

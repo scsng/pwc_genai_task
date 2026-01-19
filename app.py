@@ -36,7 +36,7 @@ def get_agentic_workflow():
     max_task_count = int(os.getenv("MAX_TASK_COUNT", "3"))
     return AgenticWorkflow(llm=chat_client.llm,
                            vector_db=QdrantDB(collection_name=os.getenv("COLLECTION_NAME"),
-                                              qdrant_host=os.getenv("QDRANT_HOST"),
+                                              qdrant_host=os.getenv("QDRANT_URL"),
                                               embedding_model=os.getenv("EMBEDDING_MODEL"),
                                               qdrant_api_key=os.getenv("QDRANT_API_KEY"),
                                               top_k=os.getenv("TOP_K")),

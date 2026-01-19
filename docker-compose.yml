@@ -1,4 +1,35 @@
 services:
+  #========================================================
+  # Legal GenAI Streamlit App
+  #========================================================
+  legal-genai-app:
+    build:
+      context: .
+      dockerfile: DOCKERFILE
+    container_name: legal-genai-app
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - QDRANT_URL=http://qdrant_db_node:6333
+      - LANGFUSE_HOST=http://langfuse-web:3000
+      - FORCE_REINIT=${FORCE_REINIT:-false}
+      - INIT_MARKER_PATH=/app/data/.initialized
+    volumes:
+      - legal_genai_app_data:/app/data
+    depends_on:
+      langfuse-web:
+        condition: service_started
+      qdrant_db_node:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - legal_genai
+
+  #========================================================
+  # Qdrant Vector Database
+  #========================================================
   qdrant_db_node:
     image: docker.io/qdrant/qdrant:v1.15
     container_name: "qdrant_db_node"
@@ -9,7 +40,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    command: "./qdrant --uri http://qdrant_db_node:6335"
+    command: "./qdrant --uri http://qdrant_db_node:6333"
     healthcheck:
       test: curl -s http://0.0.0.0:6333/healthz | grep -q 'healthz check passed' || exit 1
       interval: 30s
@@ -115,6 +146,13 @@ services:
       LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
     networks:
       - legal_genai
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+
 
   clickhouse:
     image: docker.io/clickhouse/clickhouse-server
@@ -209,6 +247,8 @@ services:
       - legal_genai
 
 volumes:
+  legal_genai_app_data:
+    driver: local
   langfuse_postgres_data:
     driver: local
   langfuse_clickhouse_data:
