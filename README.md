@@ -159,10 +159,10 @@ The test notebook is available here: [quality_tests.ipynb](testing/quality_tests
 
 | Metric      | Mean | Std  | Min | Max |
 |-------------|------|------|-----|-----|
-| Correctness | 2.40 | 1.45 |  1  |  5  |
-| Fluency     | 4.73 | 0.59 |  3  |  5  |
-| Relevance   | 2.60 | 1.40 |  1  |  5  |
-| Coverage    | 2.40 | 1.45 |  1  |  5  |
+| Correctness | 3.00 | 1.41 |  1  |  5  |
+| Fluency     | 4.50 | 0.90 |  2  |  5  |
+| Relevance   | 3.67 | 1.44 |  2  |  5  |
+| Coverage    | 2.92 | 1.51 |  1  |  5  |
 
 These results indicate that while the system performed very well in terms of fluency, there is room for improvement in correctness, relevance, and coverage in its responses.
 
